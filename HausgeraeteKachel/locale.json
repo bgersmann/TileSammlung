@@ -1,0 +1,34 @@
+{
+    "translations": {
+        "de": {
+            "Appliance Tile": "Haushaltsgeräte-Kachel",
+            "Assign the status variables of the appliance. Every variable is optional - missing values are simply not shown, so the tile fits all kinds of appliances.": "Statusvariablen des Geräts zuordnen. Jede Variable ist optional - fehlende Werte werden nicht angezeigt, dadurch passt die Kachel für ganz unterschiedliche Geräte.",
+            "Name (empty = instance name)": "Name (leer = Instanzname)",
+            "Icon": "Icon",
+            "Variables": "Variablen",
+            "State (text)": "Zustand (Text)",
+            "Progress (%)": "Fortschritt (%)",
+            "Progress": "Fortschritt",
+            "Remaining time": "Restzeit",
+            "End": "Ende",
+            "Power": "Leistung",
+            "Run energy": "Verbrauch",
+            "Total energy": "Energie gesamt",
+            "Last runtime": "Letzte Laufzeit",
+            "Appliance counts as running above (W)": "Gerät gilt als aktiv ab (W)",
+            "Icon: any Font Awesome name, e.g. washing-machine, dryer-heat, dishwasher, oven.": "Icon: beliebiger Font-Awesome-Name, z.B. washing-machine, dryer-heat, dishwasher, oven.",
+            "Remaining time: a variable without a profile is interpreted as seconds; with a profile the formatted value is shown.": "Restzeit: eine Variable ohne Profil wird als Sekunden interpretiert; mit Profil wird der formatierte Wert angezeigt.",
+            "Instance is active": "Instanz ist aktiv",
+            "No variables configured yet": "Noch keine Variablen konfiguriert",
+            "Running": "Läuft",
+            "Off": "Aus",
+            "Last end": "Ende",
+            "ready at about %s": "fertig gegen %s",
+            "No variables configured": "Keine Variablen konfiguriert",
+            "Instance inactive": "Instanz inaktiv",
+            "d": "T",
+            "h": "h",
+            "min": "min"
+        }
+    }
+}

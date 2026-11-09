@@ -1,0 +1,17 @@
+{
+    "id": "{32E05C05-4A4B-4C7D-A792-E975CA1DA4C6}",
+    "name": "HausgeraeteKachel",
+    "type": 3,
+    "vendor": "",
+    "aliases": [
+        "Haushaltsgeräte Kachel",
+        "Waschmaschine Trockner Kachel"
+    ],
+    "parentRequirements": [],
+    "childRequirements": [],
+    "implemented": [
+        "{6E3E09BC-4C83-0ABF-4C97-7E7B8C70A64E}"
+    ],
+    "prefix": "TSHG",
+    "url": ""
+}

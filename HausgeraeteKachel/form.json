@@ -1,0 +1,83 @@
+{
+    "elements": [
+        {
+            "type": "Label",
+            "bold": true,
+            "caption": "Appliance Tile"
+        },
+        {
+            "type": "Label",
+            "caption": "Assign the status variables of the appliance. Every variable is optional - missing values are simply not shown, so the tile fits all kinds of appliances."
+        },
+        {
+            "type": "RowLayout",
+            "items": [
+                {
+                    "type": "ValidationTextBox",
+                    "name": "Name",
+                    "caption": "Name (empty = instance name)"
+                },
+                {
+                    "type": "ValidationTextBox",
+                    "name": "Icon",
+                    "caption": "Icon"
+                }
+            ]
+        },
+        {
+            "type": "ExpansionPanel",
+            "caption": "Variables",
+            "expanded": true,
+            "items": [
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        { "type": "SelectVariable", "name": "StateID", "caption": "State (text)" },
+                        { "type": "SelectVariable", "name": "ProgressID", "caption": "Progress (%)" }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        { "type": "SelectVariable", "name": "RemainingID", "caption": "Remaining time" },
+                        { "type": "SelectVariable", "name": "EndID", "caption": "End" }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        { "type": "SelectVariable", "name": "PowerID", "caption": "Power" },
+                        { "type": "SelectVariable", "name": "ConsumptionID", "caption": "Run energy" }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        { "type": "SelectVariable", "name": "EnergyID", "caption": "Total energy" },
+                        { "type": "SelectVariable", "name": "LastRunID", "caption": "Last runtime" }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "NumberSpinner",
+            "name": "ActiveWatts",
+            "caption": "Appliance counts as running above (W)",
+            "digits": 1,
+            "suffix": " W"
+        },
+        {
+            "type": "Label",
+            "caption": "Icon: any Font Awesome name, e.g. washing-machine, dryer-heat, dishwasher, oven."
+        },
+        {
+            "type": "Label",
+            "caption": "Remaining time: a variable without a profile is interpreted as seconds; with a profile the formatted value is shown."
+        }
+    ],
+    "actions": [],
+    "status": [
+        { "code": 102, "icon": "active", "caption": "Instance is active" },
+        { "code": 104, "icon": "inactive", "caption": "No variables configured yet" }
+    ]
+}

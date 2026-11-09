@@ -1,0 +1,218 @@
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="/icons.js"></script>
+<style>
+    :root {
+        /* --accent-color, --content-color and --card-color are provided by the html-sdk. */
+        --on-accent: #101114;
+        --ok: #19d400;
+        --warn: #f5b800;
+        --err: #f55143;
+        --muted: rgba(128, 128, 128, .95);
+        --muted: color-mix(in srgb, var(--content-color) 62%, transparent);
+        --track: rgba(128, 128, 128, .22);
+        --track: color-mix(in srgb, var(--content-color) 14%, transparent);
+        --line: rgba(128, 128, 128, .18);
+        --line: color-mix(in srgb, var(--content-color) 10%, transparent);
+        --idle: rgba(128, 128, 128, .55);
+        --idle: color-mix(in srgb, var(--content-color) 35%, transparent);
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; overflow: hidden; }
+    /* The margins of the html-sdk become padding, so that the height of the tile is known. */
+    body { margin: 0 !important; }
+    #t { height: 100%; display: flex; flex-direction: column; gap: .6em; overflow: hidden; }
+    .hid { display: none !important; }
+    .narrow .wide-only { display: none !important; }
+    .idle-view > :not(.head) { opacity: .8; }
+
+    .head { display: flex; align-items: center; gap: .7em; min-width: 0; flex: none; }
+    .ic { position: relative; font-size: 1.3em; width: 1.3em; text-align: center; flex: none; line-height: 1; }
+    .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; flex: none; background: var(--idle); }
+    .ic .dot { position: absolute; right: -4px; bottom: -3px; box-shadow: 0 0 0 2px var(--card-color); }
+    .dot.run { background: var(--ok); animation: pulse 2.2s ease-in-out infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
+    .ht { min-width: 0; line-height: 1.25; flex: 1; }
+    .ht div { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sub { font-size: .78em; color: var(--muted); }
+    .head .pw { font-size: .78em; color: var(--muted); white-space: nowrap; flex: none; }
+    /* Symcon draws icon and name itself when the tile has a title bar. */
+    .head .inline-dot { display: none; }
+    .titled .head { gap: .45em; }
+    .titled .head .ic, .titled .head .name { display: none; }
+    .titled .head .inline-dot { display: inline-block; margin-right: 2px; }
+
+    .kpis { display: flex; gap: .55em; flex: none; }
+    .kpi { flex: 1 1 0; min-width: 0; line-height: 1.15; }
+    .kpi .v { font-size: 1.45em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .kpi .l { font-size: .74em; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    .barx { min-width: 0; flex: none; }
+    .barx .r { display: flex; justify-content: space-between; gap: .5em; font-size: .76em; line-height: 1.35; color: var(--muted); }
+    .barx .r span { white-space: nowrap; }
+    .barx .r span:last-child { color: var(--content-color); }
+    .track { height: 5px; border-radius: 3px; background: var(--track); overflow: hidden; margin-top: 2px; }
+    .track i { display: block; height: 100%; background: var(--accent-color); border-radius: 3px; transition: width .6s; }
+
+    .rows { display: flex; flex-direction: column; flex: none; }
+    .row { display: flex; justify-content: space-between; gap: .85em; padding: .26em 0; border-top: 1px solid var(--line); font-size: .85em; line-height: 1.3; }
+    .row.first { border-top: 0; }
+    .row span:first-child { color: var(--muted); white-space: nowrap; }
+    .row span:last-child { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    .empty { margin: auto; text-align: center; color: var(--muted); font-size: .9em; }
+</style>
+
+<div id="t"></div>
+
+<script>
+    // Initial state of the instance; afterwards the module pushes the complete state as JSON.
+    let state = /*INITIAL_STATE*/null;
+
+    const params = new URLSearchParams(window.location.search);
+    const px = (name, fallback) => {
+        const value = parseFloat(params.get(name));
+        return isNaN(value) ? fallback : value;
+    };
+    const padTop = px('margintop', 15), padSide = px('marginside', 15), padBottom = px('marginbottom', 15);
+    const box = document.getElementById('t');
+    box.style.padding = `${padTop}px ${padSide}px ${padBottom}px`;
+    // The visualization reserves a larger top margin when it draws a title bar itself.
+    if (padTop >= 40) {
+        document.body.classList.add('titled');
+    }
+
+    const T = (text) => (typeof translate === 'function' ? translate(text) : text);
+    // Values come from variable formatting and names from the configuration: never treat them as markup.
+    const E = (text) => String(text ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const num = (value, digits = 0) => Number(value).toLocaleString(undefined, { minimumFractionDigits: digits, maximumFractionDigits: digits });
+    const icon = (name) => `<i class="fa-light fa-${E(name)}"></i>`;
+    const has = (value) => value !== undefined && value !== null && value !== '';
+    const clamp = (value) => Math.max(0, Math.min(100, Number(value) || 0));
+
+    function duration(seconds) {
+        const s = Math.max(0, Math.floor(seconds)), d = Math.floor(s / 86400), h = Math.floor(s % 86400 / 3600), m = Math.floor(s % 3600 / 60);
+        if (d > 0) {
+            return `${d} ${T('d')} ${h} ${T('h')}`;
+        }
+        return h > 0 ? `${h} ${T('h')} ${m} ${T('min')}` : `${m} ${T('min')}`;
+    }
+
+    // Remaining time: a plain number without a profile is treated as seconds,
+    // anything with a unit (e.g. "87 min") is shown as formatted by Symcon.
+    function remainingText(d) {
+        if (has(d.remainingText) && /[^\d.,\s-]/.test(d.remainingText)) {
+            return d.remainingText;
+        }
+        return has(d.remaining) && d.remaining > 0 ? duration(d.remaining) : '';
+    }
+    const remainingSeconds = (d) => (has(d.remaining) && (!has(d.remainingText) || !/[^\d.,\s-]/.test(d.remainingText)) ? Number(d.remaining) : null);
+
+    const head = (d, sub, dotCls, right = '') => `<div class="head">
+        <div class="ic">${icon(d.icon)}<span class="dot ${dotCls}"></span></div>
+        <div class="ht"><div class="name">${E(d.name)}</div><div class="sub"><span class="dot inline-dot ${dotCls}"></span>${E(sub)}</div></div>
+        ${right ? `<div class="pw">${E(right)}</div>` : ''}
+    </div>`;
+    const kpis = (items) => `<div class="kpis">${items.map(([value, label, cls = '']) => `<div class="kpi ${cls}"><div class="v">${value}</div><div class="l">${E(label)}</div></div>`).join('')}</div>`;
+    const bar = (label, percent, text) => `<div class="barx"><div class="r"><span>${E(label)}</span><span>${E(text ?? `${num(percent)} %`)}</span></div><div class="track"><i style="width:${clamp(percent)}%"></i></div></div>`;
+    // Rows without a value are left out; the first visible row has no separator line.
+    const rows = (items) => {
+        const visible = items.filter((r) => has(r[1]));
+        return visible.length ? `<div class="rows">${visible.map(([key, value, p], i) => `<div class="row ${i === 0 ? 'first' : ''}" ${p ? `data-p="${p}"` : ''}><span>${E(key)}</span><span>${E(value)}</span></div>`).join('')}</div>` : '';
+    };
+
+    function renderRunning(d) {
+        const seconds = remainingSeconds(d);
+        let sub = d.state || T('Running');
+        if (seconds !== null && seconds > 0) {
+            const end = new Date(Date.now() + seconds * 1000);
+            sub += ` · ${T('ready at about %s').replace('%s', end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }))}`;
+        }
+        let body = head(d, sub, 'run');
+        const rest = remainingText(d);
+        if (has(d.progress)) {
+            body += bar(T('Progress'), d.progress, `${num(clamp(d.progress))} %${rest ? ` · ${rest}` : ''}`);
+        }
+        const items = [];
+        if (has(d.power)) {
+            items.push([E(d.power), T('Power')]);
+        }
+        if (!has(d.progress) && rest) {
+            items.push([E(rest), T('Remaining time')]);
+        }
+        if (has(d.consumption)) {
+            items.push([E(d.consumption), T('Run energy')]);
+        }
+        if (items.length) {
+            body += kpis(items.slice(0, 3));
+        }
+        body += rows([
+            [T('Total energy'), d.energy, 2],
+            [T('Last runtime'), d.lastRun, 3]
+        ]);
+        return body;
+    }
+
+    function renderIdle(d) {
+        let body = head(d, d.state || T('Off'), '', d.power || '');
+        body += rows([
+            [T('Last end'), d.end, 2],
+            [T('Last runtime'), d.lastRun, 3],
+            [T('Run energy'), d.consumption, 4],
+            [T('Total energy'), d.energy, 5]
+        ]);
+        return body;
+    }
+
+    function render() {
+        if (!state) {
+            return;
+        }
+        if (state.inactive) {
+            box.innerHTML = `<div class="empty">${E(T('Instance inactive'))}</div>`;
+            return;
+        }
+        box.innerHTML = state.running ? renderRunning(state) : renderIdle(state);
+        box.classList.toggle('idle-view', !state.running);
+        fit();
+    }
+
+    // Fits the content into the tile: everything marked with data-p is hidden,
+    // the highest number first, until nothing overflows.
+    function fit() {
+        const width = box.clientWidth - padSide * 2, height = box.clientHeight - padTop - padBottom;
+        document.body.classList.toggle('narrow', width < 200);
+        document.body.classList.toggle('short', height < 200);
+        box.querySelectorAll('.hid').forEach((e) => e.classList.remove('hid'));
+        const overflow = () => box.scrollHeight > box.clientHeight + 1;
+        const steps = [...new Set([...box.querySelectorAll('[data-p]')].map((e) => Number(e.dataset.p)))].sort((a, b) => b - a);
+        for (const step of steps) {
+            if (!overflow()) {
+                break;
+            }
+            const items = [...box.querySelectorAll(`[data-p="${step}"]`)].reverse();
+            for (const item of items) {
+                if (!overflow()) {
+                    break;
+                }
+                item.classList.add('hid');
+            }
+        }
+    }
+
+    window.handleMessage = (data) => {
+        state = typeof data === 'string' ? JSON.parse(data) : data;
+        render();
+    };
+
+    window.addEventListener('resize', fit);
+    if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(fit);
+    }
+    // The finish estimate is derived from the remaining time, so it is refreshed between pushes.
+    setInterval(() => {
+        if (state && state.running) {
+            render();
+        }
+    }, 60000);
+    render();
+</script>
