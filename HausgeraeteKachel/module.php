@@ -16,7 +16,7 @@ class HausgeraeteKachel extends IPSModuleStrict
 {
     use TileHelper;
 
-    private const VARIABLE_PROPERTIES = ['StateID', 'ProgressID', 'RemainingID', 'EndID', 'PowerID', 'ConsumptionID', 'EnergyID', 'LastRunID'];
+    private const VARIABLE_PROPERTIES = ['StateID', 'ProgressID', 'RemainingID', 'EndID', 'PowerID', 'ConsumptionID', 'LastRunID'];
 
     public function Create(): void
     {
@@ -28,7 +28,7 @@ class HausgeraeteKachel extends IPSModuleStrict
         foreach (self::VARIABLE_PROPERTIES as $property) {
             $this->RegisterPropertyInteger($property, 0);
         }
-        $this->RegisterPropertyFloat('ActiveWatts', 10.0);
+        $this->RegisterPropertyString('RunningValues', '2');
         $this->SetVisualizationType(defined('INSTANCE_VISUALIZATION_TYPE_HTML') ? constant('INSTANCE_VISUALIZATION_TYPE_HTML') : 1);
     }
 
@@ -88,18 +88,32 @@ class HausgeraeteKachel extends IPSModuleStrict
         return __DIR__ . '/tile.html';
     }
 
+    /**
+     * Läuft das Gerät? Maßgeblich ist der Rohwert der Zustandsvariable: er zählt als
+     * "läuft", wenn er in der Liste RunningValues steht (kommagetrennt, Vergleich als
+     * Text - passt damit für Integer-, String- und Bool-Variablen). Nur wenn keine
+     * Zustandsvariable oder keine Liste konfiguriert ist, gilt ein angefangener
+     * Fortschritt (1-99 %) als "läuft".
+     */
+    private function IsRunning(?float $progress): bool
+    {
+        $stateID = $this->ReadPropertyInteger('StateID');
+        $runningValues = array_values(array_filter(array_map('trim', explode(',', $this->ReadPropertyString('RunningValues'))), fn ($value) => $value !== ''));
+        if ($stateID > 0 && IPS_VariableExists($stateID) && count($runningValues) > 0) {
+            $stateRaw = $this->TileRaw($stateID);
+            $state = is_bool($stateRaw) ? ($stateRaw ? '1' : '0') : trim((string) $stateRaw);
+            return in_array($state, $runningValues, true);
+        }
+        return $progress !== null && $progress > 0 && $progress < 100;
+    }
+
     /** Anzeigedaten des Geräts: formatierte Werte plus Rohwerte für Balken und Restzeit. */
     private function TileState(): array
     {
         $progressRaw = $this->TileRaw($this->ReadPropertyInteger('ProgressID'));
         $progress = is_numeric($progressRaw) ? (float) $progressRaw : null;
-        $powerRaw = $this->TileRaw($this->ReadPropertyInteger('PowerID'));
-        $power = is_numeric($powerRaw) ? (float) $powerRaw : null;
         $remainingRaw = $this->TileRaw($this->ReadPropertyInteger('RemainingID'));
-
-        // Läuft: Leistung über der Schwelle oder ein angefangener Fortschritt.
-        $running = ($power !== null && $power >= $this->ReadPropertyFloat('ActiveWatts'))
-            || ($progress !== null && $progress > 0 && $progress < 100);
+        $running = $this->IsRunning($progress);
 
         $name = $this->ReadPropertyString('Name');
         return [
@@ -113,7 +127,6 @@ class HausgeraeteKachel extends IPSModuleStrict
             'end'           => $this->TileFormatted($this->ReadPropertyInteger('EndID')),
             'power'         => $this->TileFormatted($this->ReadPropertyInteger('PowerID')),
             'consumption'   => $this->TileFormatted($this->ReadPropertyInteger('ConsumptionID')),
-            'energy'        => $this->TileFormatted($this->ReadPropertyInteger('EnergyID')),
             'lastRun'       => $this->TileFormatted($this->ReadPropertyInteger('LastRunID'))
         ];
     }

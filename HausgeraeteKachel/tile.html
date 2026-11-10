@@ -146,8 +146,7 @@
             body += kpis(items.slice(0, 3));
         }
         body += rows([
-            [T('Total energy'), d.energy, 2],
-            [T('Last runtime'), d.lastRun, 3]
+            [T('Last runtime'), d.lastRun, 2]
         ]);
         return body;
     }
@@ -157,8 +156,7 @@
         body += rows([
             [T('Last end'), d.end, 2],
             [T('Last runtime'), d.lastRun, 3],
-            [T('Run energy'), d.consumption, 4],
-            [T('Total energy'), d.energy, 5]
+            [T('Run energy'), d.consumption, 4]
         ]);
         return body;
     }

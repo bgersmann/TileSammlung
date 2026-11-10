@@ -53,18 +53,19 @@
                 {
                     "type": "RowLayout",
                     "items": [
-                        { "type": "SelectVariable", "name": "EnergyID", "caption": "Total energy" },
                         { "type": "SelectVariable", "name": "LastRunID", "caption": "Last runtime" }
                     ]
                 }
             ]
         },
         {
-            "type": "NumberSpinner",
-            "name": "ActiveWatts",
-            "caption": "Appliance counts as running above (W)",
-            "digits": 1,
-            "suffix": " W"
+            "type": "ValidationTextBox",
+            "name": "RunningValues",
+            "caption": "State values that count as running"
+        },
+        {
+            "type": "Label",
+            "caption": "Running detection: raw values of the state variable, comma separated (e.g. '1, 2' or 'Running'). If empty or no state variable is set, a progress between 1 and 99 % counts as running."
         },
         {
             "type": "Label",
