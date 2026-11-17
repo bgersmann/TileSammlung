@@ -16,9 +16,9 @@
     html, body { height: 100%; overflow: hidden; }
     /* The margins of the html-sdk become padding, so that the height of the tile is known. */
     body { margin: 0 !important; }
+    /* The grid always starts at the top left; rows keep their natural height. */
     #t { height: 100%; overflow: hidden; display: grid; align-content: start;
          grid-template-columns: repeat(auto-fill, minmax(var(--cell, 84px), 1fr)); gap: 7px; }
-    #t.center { align-content: center; }
 
     .cell { display: flex; flex-direction: column; align-items: center; justify-content: center;
             gap: 2px; padding: .45em .3em; border-radius: 10px; background: var(--cellbg);
@@ -84,16 +84,12 @@
     function fit() {
         const width = box.clientWidth - padSide * 2;
         const overflow = () => box.scrollHeight > box.clientHeight + 1;
-        box.classList.remove('center');
         for (const [cellSize, font] of [[84, 1], [74, .92], [64, .85], [56, .78]]) {
             box.style.setProperty('--cell', `${Math.min(cellSize, Math.max(width - 8, 40))}px`);
             box.style.fontSize = `${font}em`;
             if (!overflow()) {
                 break;
             }
-        }
-        if (!overflow()) {
-            box.classList.add('center');
         }
     }
 

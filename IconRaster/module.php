@@ -106,6 +106,38 @@ class IconRaster extends IPSModuleStrict
         return is_array($items) ? $items : [];
     }
 
+    /**
+     * Icon eines Objekts: Objekt-Icon, sonst das Icon der Darstellung (Presentation),
+     * sonst das Icon eines klassischen Variablenprofils.
+     */
+    private function ObjectIcon(int $objectID): string
+    {
+        $icon = (string) IPS_GetObject($objectID)['ObjectIcon'];
+        if ($icon !== '' || !IPS_VariableExists($objectID)) {
+            return $icon;
+        }
+        $presentation = @IPS_GetVariablePresentation($objectID);
+        if (is_array($presentation) && trim((string) ($presentation['ICON'] ?? '')) !== '') {
+            return trim((string) $presentation['ICON']);
+        }
+        // Klassisches Profil: direkt an der Variable oder als PROFILE-Parameter der Darstellung.
+        $variable = IPS_GetVariable($objectID);
+        $candidates = [
+            (string) $variable['VariableCustomProfile'],
+            (string) $variable['VariableProfile'],
+            is_array($presentation) ? trim((string) ($presentation['PROFILE'] ?? '')) : ''
+        ];
+        foreach ($candidates as $profileName) {
+            if ($profileName !== '' && IPS_VariableProfileExists($profileName)) {
+                $icon = (string) IPS_GetVariableProfile($profileName)['Icon'];
+                if ($icon !== '') {
+                    return $icon;
+                }
+            }
+        }
+        return '';
+    }
+
     private function IsConfigured(int $objectID): bool
     {
         foreach ($this->Items() as $item) {
@@ -143,7 +175,7 @@ class IconRaster extends IPSModuleStrict
 
         $icon = trim((string) ($item['Icon'] ?? ''));
         if ($icon === '') {
-            $icon = IPS_GetObject($objectID)['ObjectIcon'];
+            $icon = $this->ObjectIcon($objectID);
         }
         if ($icon === '') {
             $icon = $isScript ? 'play' : ($isBool ? 'power' : 'circle-info');
