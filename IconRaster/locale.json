@@ -1,0 +1,19 @@
+{
+    "translations": {
+        "de": {
+            "Icon Grid": "Icon-Raster",
+            "The list order defines the grid order (top left to bottom right). Boolean variables are toggled by tapping, scripts are started. Icon empty = object icon.": "Die Listenreihenfolge bestimmt das Raster (oben links nach unten rechts). Bool-Variablen werden per Tipp umgeschaltet, Skripte gestartet. Icon leer = Objekt-Icon.",
+            "Entries": "Einträge",
+            "Variable / Script": "Variable / Skript",
+            "Icon": "Icon",
+            "Icon visible": "Icon zeigen",
+            "Value visible": "Wert zeigen",
+            "Name visible": "Name zeigen",
+            "Icon: any Font Awesome name, e.g. lightbulb, power-off, droplet, temperature-half.": "Icon: beliebiger Font-Awesome-Name, z.B. lightbulb, power-off, droplet, temperature-half.",
+            "Instance is active": "Instanz ist aktiv",
+            "No entries configured yet": "Noch keine Einträge konfiguriert",
+            "No entries configured": "Keine Einträge konfiguriert",
+            "Instance inactive": "Instanz inaktiv"
+        }
+    }
+}

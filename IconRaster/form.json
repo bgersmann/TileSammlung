@@ -1,0 +1,69 @@
+{
+    "elements": [
+        {
+            "type": "Label",
+            "bold": true,
+            "caption": "Icon Grid"
+        },
+        {
+            "type": "Label",
+            "caption": "The list order defines the grid order (top left to bottom right). Boolean variables are toggled by tapping, scripts are started. Icon empty = object icon."
+        },
+        {
+            "type": "List",
+            "name": "Items",
+            "caption": "Entries",
+            "rowCount": 10,
+            "add": true,
+            "delete": true,
+            "changeOrder": true,
+            "multiAdd": true,
+            "columns": [
+                {
+                    "caption": "Variable / Script",
+                    "name": "ObjectID",
+                    "width": "280px",
+                    "add": 0,
+                    "edit": { "type": "SelectObject" }
+                },
+                {
+                    "caption": "Icon",
+                    "name": "Icon",
+                    "width": "140px",
+                    "add": "",
+                    "edit": { "type": "ValidationTextBox" }
+                },
+                {
+                    "caption": "Icon visible",
+                    "name": "ShowIcon",
+                    "width": "100px",
+                    "add": true,
+                    "edit": { "type": "CheckBox" }
+                },
+                {
+                    "caption": "Value visible",
+                    "name": "ShowValue",
+                    "width": "100px",
+                    "add": true,
+                    "edit": { "type": "CheckBox" }
+                },
+                {
+                    "caption": "Name visible",
+                    "name": "ShowName",
+                    "width": "100px",
+                    "add": true,
+                    "edit": { "type": "CheckBox" }
+                }
+            ]
+        },
+        {
+            "type": "Label",
+            "caption": "Icon: any Font Awesome name, e.g. lightbulb, power-off, droplet, temperature-half."
+        }
+    ],
+    "actions": [],
+    "status": [
+        { "code": 102, "icon": "active", "caption": "Instance is active" },
+        { "code": 104, "icon": "inactive", "caption": "No entries configured yet" }
+    ]
+}

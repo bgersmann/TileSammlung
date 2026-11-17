@@ -33,6 +33,19 @@ Icons: beliebige Font-Awesome-Namen (light), z. B. `washing-machine`, `dryer-hea
 Die Kachel passt sich der Größe an: bei kleinen Kacheln werden Detailzeilen automatisch
 ausgeblendet (2x2 bis 6x4 getestet).
 
+### IconRaster
+
+Zeigt beliebige Variablen und Skripte als **Raster** (oben links nach unten rechts, Reihenfolge
+per Drag & Drop in der Liste). Pro Eintrag ist wählbar, ob **Icon, Wert und/oder Name**
+angezeigt werden; das Icon kommt aus der Liste, sonst vom Objekt, sonst ein Standard.
+
+- **Bool-Variablen** werden per Tipp umgeschaltet (RequestAction, ohne Aktion SetValue) und
+  im aktiven Zustand farblich hervorgehoben.
+- **Skripte** werden per Tipp gestartet (kurzes Aufleuchten als Rückmeldung).
+- Alle anderen Variablen sind reine Anzeige.
+
+Das Raster passt Zellgröße und Schrift automatisch an die Kachelgröße an.
+
 ## Eigene Kacheln ergänzen
 
 Neues Modulverzeichnis neben `HausgeraeteKachel` anlegen, `libs/TileHelper.php` einbinden

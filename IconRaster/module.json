@@ -1,0 +1,17 @@
+{
+    "id": "{AD98E40E-C64D-4721-8A1F-CD6CE2F31BA5}",
+    "name": "IconRaster",
+    "type": 3,
+    "vendor": "",
+    "aliases": [
+        "Icon Raster",
+        "Icon Grid Kachel"
+    ],
+    "parentRequirements": [],
+    "childRequirements": [],
+    "implemented": [
+        "{6E3E09BC-4C83-0ABF-4C97-7E7B8C70A64E}"
+    ],
+    "prefix": "TSIR",
+    "url": ""
+}

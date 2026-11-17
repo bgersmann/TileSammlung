@@ -1,0 +1,123 @@
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="/icons.js"></script>
+<style>
+    :root {
+        /* --accent-color, --content-color and --card-color are provided by the html-sdk. */
+        --muted: rgba(128, 128, 128, .95);
+        --muted: color-mix(in srgb, var(--content-color) 62%, transparent);
+        --track: rgba(128, 128, 128, .22);
+        --track: color-mix(in srgb, var(--content-color) 14%, transparent);
+        --cellbg: rgba(128, 128, 128, .08);
+        --cellbg: color-mix(in srgb, var(--content-color) 5%, transparent);
+        --activebg: rgba(0, 205, 171, .14);
+        --activebg: color-mix(in srgb, var(--accent-color) 14%, transparent);
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; overflow: hidden; }
+    /* The margins of the html-sdk become padding, so that the height of the tile is known. */
+    body { margin: 0 !important; }
+    #t { height: 100%; overflow: hidden; display: grid; align-content: start;
+         grid-template-columns: repeat(auto-fill, minmax(var(--cell, 84px), 1fr)); gap: 7px; }
+    #t.center { align-content: center; }
+
+    .cell { display: flex; flex-direction: column; align-items: center; justify-content: center;
+            gap: 2px; padding: .45em .3em; border-radius: 10px; background: var(--cellbg);
+            border: 0; font: inherit; color: inherit; min-width: 0; line-height: 1.2; text-align: center; }
+    button.cell { cursor: pointer; transition: transform .1s; }
+    button.cell:active { transform: scale(.94); }
+    .cell.on { background: var(--activebg); }
+    .cell.on .ic { color: var(--accent-color); }
+    .cell.flash .ic { animation: flash .5s; }
+    @keyframes flash { 0% { color: var(--accent-color); } 100% { color: inherit; } }
+
+    .ic { font-size: 1.45em; line-height: 1.2; }
+    .val { font-size: .92em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+    .nm { font-size: .72em; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+    .empty { margin: auto; text-align: center; color: var(--muted); font-size: .9em; grid-column: 1 / -1; }
+</style>
+
+<div id="t"></div>
+
+<script>
+    // Initial state of the instance; afterwards the module pushes the complete state as JSON.
+    let state = /*INITIAL_STATE*/null;
+
+    const params = new URLSearchParams(window.location.search);
+    const px = (name, fallback) => {
+        const value = parseFloat(params.get(name));
+        return isNaN(value) ? fallback : value;
+    };
+    const padTop = px('margintop', 15), padSide = px('marginside', 15), padBottom = px('marginbottom', 15);
+    const box = document.getElementById('t');
+    box.style.padding = `${padTop}px ${padSide}px ${padBottom}px`;
+
+    const T = (text) => (typeof translate === 'function' ? translate(text) : text);
+    // Values come from variable formatting and names from the object tree: never treat them as markup.
+    const E = (text) => String(text ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const icon = (name) => `<i class="fa-light fa-${E(name)}"></i>`;
+    const has = (value) => value !== undefined && value !== null && value !== '';
+
+    function cell(item) {
+        const tag = item.action ? 'button' : 'div';
+        const parts = [
+            item.showIcon ? `<span class="ic">${icon(item.icon)}</span>` : '',
+            item.showValue && has(item.value) ? `<span class="val">${E(item.value)}</span>` : '',
+            item.showName ? `<span class="nm">${E(item.name)}</span>` : ''
+        ].join('');
+        return `<${tag} class="cell ${item.active ? 'on' : ''}" ${item.action ? `data-press="${Number(item.id)}"` : ''} title="${E(item.name)}">${parts}</${tag}>`;
+    }
+
+    function render() {
+        if (!state) {
+            return;
+        }
+        const items = state.items || [];
+        if (state.inactive || items.length === 0) {
+            box.innerHTML = `<div class="empty">${E(T(state.inactive ? 'Instance inactive' : 'No entries configured'))}</div>`;
+            return;
+        }
+        box.innerHTML = items.map(cell).join('');
+        fit();
+    }
+
+    // Fits the grid into the tile: smaller cells and font until nothing overflows.
+    function fit() {
+        const width = box.clientWidth - padSide * 2;
+        const overflow = () => box.scrollHeight > box.clientHeight + 1;
+        box.classList.remove('center');
+        for (const [cellSize, font] of [[84, 1], [74, .92], [64, .85], [56, .78]]) {
+            box.style.setProperty('--cell', `${Math.min(cellSize, Math.max(width - 8, 40))}px`);
+            box.style.fontSize = `${font}em`;
+            if (!overflow()) {
+                break;
+            }
+        }
+        if (!overflow()) {
+            box.classList.add('center');
+        }
+    }
+
+    window.handleMessage = (data) => {
+        state = typeof data === 'string' ? JSON.parse(data) : data;
+        render();
+    };
+
+    box.addEventListener('click', (event) => {
+        const target = event.target.closest('[data-press]');
+        if (!target) {
+            return;
+        }
+        target.classList.remove('flash');
+        void target.offsetWidth;
+        target.classList.add('flash');
+        if (typeof requestAction === 'function') {
+            requestAction('Press', Number(target.dataset.press));
+        }
+    });
+
+    window.addEventListener('resize', fit);
+    if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(fit);
+    }
+    render();
+</script>
