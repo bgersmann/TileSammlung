@@ -85,12 +85,21 @@
         Bath: 'bath', Bed: 'bed', Sofa: 'couch', Kitchen: 'utensils', WC: 'toilet', Car: 'car',
         Tree: 'tree', Flower: 'seedling', Factory: 'industry', Robot: 'robot', Plug: 'plug'
     };
+    // Symcon's own icons (window-left-tilted, heatpump, ...) are registered under the
+    // kit prefix only, so the family is chosen per icon.
+    const isKitIcon = (name) => {
+        try {
+            return !!window['___FONT_AWESOME___'].styles.fak[name];
+        } catch (e) {
+            return false;
+        }
+    };
     const icon = (name) => {
         let n = String(name ?? '');
         if (/[A-Z]/.test(n)) {
             n = classicIcons[n] || n.toLowerCase();
         }
-        return `<i class="fa-light fa-${E(n)}"></i>`;
+        return `<i class="${isKitIcon(n) ? 'fa-kit' : 'fa-light'} fa-${E(n)}"></i>`;
     };
     const has = (value) => value !== undefined && value !== null && value !== '';
 

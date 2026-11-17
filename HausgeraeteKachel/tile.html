@@ -85,7 +85,15 @@
     // Values come from variable formatting and names from the configuration: never treat them as markup.
     const E = (text) => String(text ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     const num = (value, digits = 0) => Number(value).toLocaleString(undefined, { minimumFractionDigits: digits, maximumFractionDigits: digits });
-    const icon = (name) => `<i class="fa-light fa-${E(name)}"></i>`;
+    // Symcon's own icons (e.g. washing-machine variants) may live in the kit family only.
+    const isKitIcon = (name) => {
+        try {
+            return !!window['___FONT_AWESOME___'].styles.fak[name];
+        } catch (e) {
+            return false;
+        }
+    };
+    const icon = (name) => `<i class="${isKitIcon(name) ? 'fa-kit' : 'fa-light'} fa-${E(name)}"></i>`;
     const has = (value) => value !== undefined && value !== null && value !== '';
     const clamp = (value) => Math.max(0, Math.min(100, Number(value) || 0));
 
