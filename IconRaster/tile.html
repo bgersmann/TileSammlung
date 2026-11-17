@@ -18,13 +18,15 @@
     html, body { height: 100%; overflow: hidden; }
     /* The margins of the html-sdk become padding, so that the height of the tile is known. */
     body { margin: 0 !important; }
-    /* The grid always starts at the top left; rows keep their natural height. */
-    #t { height: 100%; overflow: hidden; display: grid; align-content: start;
-         grid-template-columns: repeat(auto-fill, minmax(var(--cell, 84px), 1fr)); gap: 7px; }
+    /* Cells and group boxes flow from the top left and wrap; after a group the
+       row simply continues with the next group or single cell. */
+    #t { height: 100%; overflow: hidden; display: flex; flex-wrap: wrap;
+         align-content: flex-start; align-items: stretch; gap: 7px; }
 
     .cell { display: flex; flex-direction: column; align-items: center; justify-content: center;
             gap: 2px; padding: .45em .3em; border-radius: 10px; background: var(--cellbg);
-            border: 0; font: inherit; color: inherit; min-width: 0; line-height: 1.2; text-align: center; }
+            border: 0; font: inherit; color: inherit; min-width: 0; line-height: 1.2; text-align: center;
+            width: var(--cell, 84px); max-width: 100%; flex: none; }
     button.cell { cursor: pointer; transition: transform .1s; }
     button.cell:active { transform: scale(.94); }
     .cell.on { background: var(--activebg); }
@@ -32,10 +34,10 @@
     .cell.flash .ic { animation: flash .5s; }
     @keyframes flash { 0% { color: var(--accent-color); } 100% { color: inherit; } }
 
-    /* A group is a framed box across the full width: header inside, own grid below. */
-    .gbox { grid-column: 1 / -1; border: 1px solid var(--line); border-radius: 13px; padding: 7px;
+    /* A group is a framed box only as wide as its cells: header inside, cells wrapping below. */
+    .gbox { border: 1px solid var(--line); border-radius: 13px; padding: 7px; max-width: 100%;
             display: flex; flex-direction: column; gap: 6px; min-width: 0; }
-    .ggrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(var(--cell, 84px), 1fr)); gap: 7px; }
+    .ggrid { display: flex; flex-wrap: wrap; gap: 7px; flex: 1; align-content: flex-start; align-items: stretch; }
     .grp { display: flex; align-items: center; gap: .6em; min-width: 0; padding: 0 2px;
            font-size: .74em; color: var(--muted); }
     .grp span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -45,7 +47,7 @@
     .ic { font-size: 1.45em; line-height: 1.2; }
     .val { font-size: .92em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
     .nm { font-size: .72em; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
-    .empty { margin: auto; text-align: center; color: var(--muted); font-size: .9em; grid-column: 1 / -1; }
+    .empty { margin: auto; text-align: center; color: var(--muted); font-size: .9em; width: 100%; }
 </style>
 
 <div id="t"></div>
