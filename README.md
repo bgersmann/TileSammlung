@@ -39,10 +39,12 @@ Zeigt beliebige Variablen und Skripte als **Raster** (oben links nach unten rech
 per Drag & Drop in der Liste). Pro Eintrag ist wählbar, ob **Icon, Wert und/oder Name**
 angezeigt werden; das Icon kommt aus der Liste, sonst vom Objekt, sonst ein Standard.
 
-- **Bool-Variablen** werden per Tipp umgeschaltet (RequestAction, ohne Aktion SetValue) und
-  im aktiven Zustand farblich hervorgehoben.
+- **Bool-Variablen mit Aktion** werden per Tipp umgeschaltet (RequestAction) und im aktiven
+  Zustand farblich hervorgehoben; Bool-Variablen ohne Aktion sind reine Anzeige.
 - **Skripte** werden per Tipp gestartet (kurzes Aufleuchten als Rückmeldung).
 - Alle anderen Variablen sind reine Anzeige.
+- **Gruppen:** Aufeinanderfolgende Einträge mit gleichem Gruppennamen erhalten eine
+  hervorgehobene Gruppenüberschrift (Akzentmarker + Trennlinie) über die volle Breite.
 
 Das Raster passt Zellgröße und Schrift automatisch an die Kachelgröße an.
 

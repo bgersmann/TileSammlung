@@ -87,14 +87,9 @@ class IconRaster extends IPSModuleStrict
             IPS_RunScriptEx($objectID, ['SENDER' => 'TileSammlung', 'INSTANCE' => $this->InstanceID]);
             return;
         }
-        if (IPS_VariableExists($objectID) && IPS_GetVariable($objectID)['VariableType'] === VARIABLETYPE_BOOLEAN) {
-            $newValue = !GetValueBoolean($objectID);
-            if (HasAction($objectID)) {
-                RequestAction($objectID, $newValue);
-            } else {
-                SetValue($objectID, $newValue);
-            }
-            // Für Variablen ohne Ereignis-Feedback direkt pushen.
+        // Nur Bool-Variablen mit Aktion sind schaltbar; alles andere ist reine Anzeige.
+        if (IPS_VariableExists($objectID) && IPS_GetVariable($objectID)['VariableType'] === VARIABLETYPE_BOOLEAN && HasAction($objectID)) {
+            RequestAction($objectID, !GetValueBoolean($objectID));
             $this->TilePush();
         }
     }
@@ -218,10 +213,11 @@ class IconRaster extends IPSModuleStrict
         return [
             'id'       => $objectID,
             'name'     => IPS_GetName($objectID),
+            'group'    => trim((string) ($item['Group'] ?? '')),
             'icon'     => $icon,
             'value'    => $isVariable ? GetValueFormatted($objectID) : null,
             'active'   => $isBool ? GetValueBoolean($objectID) : false,
-            'action'   => $isScript || $isBool,
+            'action'   => $isScript || ($isBool && HasAction($objectID)),
             'showIcon' => (bool) ($item['ShowIcon'] ?? true),
             'showValue'=> (bool) ($item['ShowValue'] ?? true) && $isVariable,
             'showName' => (bool) ($item['ShowName'] ?? true)

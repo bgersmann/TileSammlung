@@ -2,8 +2,9 @@
     "translations": {
         "de": {
             "Icon Grid": "Icon-Raster",
-            "The list order defines the grid order (top left to bottom right). Boolean variables are toggled by tapping, scripts are started. Icon empty = object icon.": "Die Listenreihenfolge bestimmt das Raster (oben links nach unten rechts). Bool-Variablen werden per Tipp umgeschaltet, Skripte gestartet. Icon leer = Objekt-Icon.",
+            "The list order defines the grid order (top left to bottom right). Boolean variables with an action are toggled by tapping, scripts are started. Icon empty = icon of the object or its presentation. Consecutive entries with the same group get a highlighted group header.": "Die Listenreihenfolge bestimmt das Raster (oben links nach unten rechts). Bool-Variablen mit Aktion werden per Tipp umgeschaltet, Skripte gestartet. Icon leer = Icon des Objekts bzw. seiner Darstellung. Aufeinanderfolgende Einträge mit gleicher Gruppe erhalten eine hervorgehobene Gruppenüberschrift.",
             "Entries": "Einträge",
+            "Group": "Gruppe",
             "Variable / Script": "Variable / Skript",
             "Icon": "Icon",
             "Icon visible": "Icon zeigen",
