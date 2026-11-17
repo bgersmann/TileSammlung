@@ -108,7 +108,10 @@ class IconRaster extends IPSModuleStrict
 
     /**
      * Icon eines Objekts: Objekt-Icon, sonst das Icon der Darstellung (Presentation),
-     * sonst das Icon eines klassischen Variablenprofils.
+     * sonst das Icon eines klassischen Variablenprofils. Darstellungen speichern das
+     * Icon je nach Typ unterschiedlich: wertabhängige OPTIONS (Enumeration),
+     * ICON_TRUE/ICON_FALSE (Schalter) oder ein allgemeines ICON. Dadurch kann das
+     * Icon dem aktuellen Wert folgen (z. B. Fenster offen/geschlossen).
      */
     private function ObjectIcon(int $objectID): string
     {
@@ -116,9 +119,34 @@ class IconRaster extends IPSModuleStrict
         if ($icon !== '' || !IPS_VariableExists($objectID)) {
             return $icon;
         }
+        $value = GetValue($objectID);
         $presentation = @IPS_GetVariablePresentation($objectID);
-        if (is_array($presentation) && trim((string) ($presentation['ICON'] ?? '')) !== '') {
-            return trim((string) $presentation['ICON']);
+        if (is_array($presentation)) {
+            $options = $presentation['OPTIONS'] ?? null;
+            if (is_string($options)) {
+                $options = json_decode($options, true);
+            }
+            if (is_array($options)) {
+                foreach ($options as $option) {
+                    if (is_array($option) && array_key_exists('Value', $option) && $option['Value'] == $value) {
+                        $optionIcon = trim((string) ($option['IconValue'] ?? ''));
+                        if (!empty($option['IconActive']) && $optionIcon !== '') {
+                            return $optionIcon;
+                        }
+                        break;
+                    }
+                }
+            }
+            if (isset($presentation['ICON_TRUE']) || isset($presentation['ICON_FALSE'])) {
+                $useFalse = !$value && !empty($presentation['USE_ICON_FALSE']);
+                $icon = trim((string) (($useFalse ? $presentation['ICON_FALSE'] : $presentation['ICON_TRUE']) ?? ''));
+                if ($icon !== '') {
+                    return $icon;
+                }
+            }
+            if (trim((string) ($presentation['ICON'] ?? '')) !== '') {
+                return trim((string) $presentation['ICON']);
+            }
         }
         // Klassisches Profil: direkt an der Variable oder als PROFILE-Parameter der Darstellung.
         $variable = IPS_GetVariable($objectID);
@@ -128,11 +156,17 @@ class IconRaster extends IPSModuleStrict
             is_array($presentation) ? trim((string) ($presentation['PROFILE'] ?? '')) : ''
         ];
         foreach ($candidates as $profileName) {
-            if ($profileName !== '' && IPS_VariableProfileExists($profileName)) {
-                $icon = (string) IPS_GetVariableProfile($profileName)['Icon'];
-                if ($icon !== '') {
-                    return $icon;
+            if ($profileName === '' || !IPS_VariableProfileExists($profileName)) {
+                continue;
+            }
+            $profile = IPS_GetVariableProfile($profileName);
+            foreach ($profile['Associations'] as $association) {
+                if ($association['Value'] == $value && (string) $association['Icon'] !== '') {
+                    return (string) $association['Icon'];
                 }
+            }
+            if ((string) $profile['Icon'] !== '') {
+                return (string) $profile['Icon'];
             }
         }
         return '';
