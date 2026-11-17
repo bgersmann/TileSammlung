@@ -32,12 +32,15 @@
     .cell.flash .ic { animation: flash .5s; }
     @keyframes flash { 0% { color: var(--accent-color); } 100% { color: inherit; } }
 
-    .grp { grid-column: 1 / -1; display: flex; align-items: center; gap: .6em; min-width: 0;
-           margin-top: .4em; font-size: .74em; color: var(--muted); }
+    /* A group is a framed box across the full width: header inside, own grid below. */
+    .gbox { grid-column: 1 / -1; border: 1px solid var(--line); border-radius: 13px; padding: 7px;
+            display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+    .ggrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(var(--cell, 84px), 1fr)); gap: 7px; }
+    .grp { display: flex; align-items: center; gap: .6em; min-width: 0; padding: 0 2px;
+           font-size: .74em; color: var(--muted); }
     .grp span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .grp::before { content: ""; width: 3px; height: 1em; border-radius: 2px; background: var(--accent-color); flex: none; }
     .grp::after { content: ""; flex: 1; height: 1px; background: var(--line); }
-    .grp:first-child { margin-top: 0; }
 
     .ic { font-size: 1.45em; line-height: 1.2; }
     .val { font-size: .92em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
@@ -108,16 +111,22 @@
             box.innerHTML = `<div class="empty">${E(T(state.inactive ? 'Instance inactive' : 'No entries configured'))}</div>`;
             return;
         }
-        // Group headers span the full width; consecutive entries with the same
-        // group share one header, entries without a group get none.
-        let html = '', lastGroup = '';
-        for (const item of items) {
-            const group = (item.group || '').trim();
-            if (group !== '' && group !== lastGroup) {
-                html += `<div class="grp"><span>${E(group)}</span></div>`;
+        // Consecutive entries with the same group become one framed box with the
+        // header inside; entries without a group stay directly in the grid.
+        let html = '';
+        for (let i = 0; i < items.length;) {
+            const group = (items[i].group || '').trim();
+            if (group === '') {
+                html += cell(items[i]);
+                i++;
+                continue;
             }
-            lastGroup = group;
-            html += cell(item);
+            let cells = '';
+            while (i < items.length && (items[i].group || '').trim() === group) {
+                cells += cell(items[i]);
+                i++;
+            }
+            html += `<div class="gbox"><div class="grp"><span>${E(group)}</span></div><div class="ggrid">${cells}</div></div>`;
         }
         box.innerHTML = html;
         fit();
