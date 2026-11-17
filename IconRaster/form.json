@@ -27,6 +27,13 @@
                     "edit": { "type": "SelectObject" }
                 },
                 {
+                    "caption": "Name (optional)",
+                    "name": "Label",
+                    "width": "140px",
+                    "add": "",
+                    "edit": { "type": "ValidationTextBox" }
+                },
+                {
                     "caption": "Group",
                     "name": "Group",
                     "width": "120px",

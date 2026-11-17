@@ -210,9 +210,10 @@ class IconRaster extends IPSModuleStrict
             $icon = $isScript ? 'play' : ($isBool ? 'power' : 'circle-info');
         }
 
+        $label = trim((string) ($item['Label'] ?? ''));
         return [
             'id'       => $objectID,
-            'name'     => IPS_GetName($objectID),
+            'name'     => $label !== '' ? $label : IPS_GetName($objectID),
             'group'    => trim((string) ($item['Group'] ?? '')),
             'icon'     => $icon,
             'value'    => $isVariable ? GetValueFormatted($objectID) : null,

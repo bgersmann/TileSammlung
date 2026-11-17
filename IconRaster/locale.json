@@ -6,6 +6,7 @@
             "Entries": "Einträge",
             "Group": "Gruppe",
             "Variable / Script": "Variable / Skript",
+            "Name (optional)": "Name (optional, leer = Objektname)",
             "Icon": "Icon",
             "Icon visible": "Icon zeigen",
             "Value visible": "Wert zeigen",
