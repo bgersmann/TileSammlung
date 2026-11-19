@@ -1,0 +1,201 @@
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="/icons.js"></script>
+<style>
+    :root {
+        /* --accent-color, --content-color and --card-color are provided by the html-sdk. */
+        --ok: #19d400;
+        --warn: #f5b800;
+        --orange: #ff8c00;
+        --err: #f55143;
+        --violet: #b26ae6;
+        --muted: rgba(128, 128, 128, .95);
+        --muted: color-mix(in srgb, var(--content-color) 62%, transparent);
+        --track: rgba(128, 128, 128, .22);
+        --track: color-mix(in srgb, var(--content-color) 14%, transparent);
+        --line: rgba(128, 128, 128, .18);
+        --line: color-mix(in srgb, var(--content-color) 10%, transparent);
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; overflow: hidden; }
+    /* The margins of the html-sdk become padding, so that the height of the tile is known. */
+    body { margin: 0 !important; }
+    #t { height: 100%; display: flex; flex-direction: column; gap: .6em; overflow: hidden; }
+    .hid { display: none !important; }
+    .narrow .wide-only { display: none !important; }
+
+    .head { display: flex; align-items: center; gap: .7em; min-width: 0; flex: none; }
+    .ic { font-size: 1.3em; width: 1.3em; text-align: center; flex: none; line-height: 1; }
+    .ht { min-width: 0; line-height: 1.25; flex: 1; }
+    .ht div { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sub { font-size: .78em; color: var(--muted); }
+    /* Symcon draws icon and name itself when the tile has a title bar. */
+    .titled .head .ic, .titled .head .name { display: none; }
+
+    .chip { font-size: .74em; padding: 2px 8px; border-radius: 10px; background: var(--track); white-space: nowrap; flex: none; }
+    .chip.uv0 { background: var(--ok); color: #0b2800; }
+    .chip.uv3 { background: var(--warn); color: #221a00; }
+    .chip.uv6 { background: var(--orange); color: #2b1600; }
+    .chip.uv8 { background: var(--err); color: #2d0400; }
+    .chip.uv11 { background: var(--violet); color: #1d0033; }
+
+    .main { display: flex; align-items: center; gap: 1em; flex: none; min-width: 0; }
+    .temp { font-size: 2.2em; line-height: 1.05; white-space: nowrap; }
+    .wind { margin-left: auto; display: flex; align-items: center; gap: .55em; min-width: 0; text-align: right; }
+    .wind .wi { font-size: 1.25em; line-height: 1; flex: none; }
+    .wind .wd { min-width: 0; line-height: 1.25; }
+    .wind .wd div { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .wind .ws { font-size: .95em; }
+    .wind .wg { font-size: .74em; color: var(--muted); }
+
+    .kpis { display: flex; gap: .55em; flex: none; }
+    .kpi { flex: 1 1 0; min-width: 0; line-height: 1.15; }
+    .kpi .v { font-size: 1.25em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .kpi .l { font-size: .74em; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    .rain { flex: none; min-width: 0; }
+    .rain .r { display: flex; justify-content: space-between; gap: .5em; font-size: .76em; line-height: 1.35; color: var(--muted); }
+    .rain .r span:last-child { color: var(--content-color); white-space: nowrap; }
+    .rgraph { display: flex; align-items: flex-end; gap: 2px; height: 38px; margin-top: 4px; }
+    .rgraph i { flex: 1 1 0; min-width: 1px; border-radius: 2px 2px 0 0; background: var(--accent-color); }
+    .rgraph i.zero { height: 2px !important; background: var(--track); border-radius: 1px; }
+    .rgraph i.future { height: 2px !important; background: transparent; border-top: 2px dotted var(--track); border-radius: 0; }
+    .rlabels { display: flex; justify-content: space-between; font-size: .64em; color: var(--muted); margin-top: 2px; }
+
+    .empty { margin: auto; text-align: center; color: var(--muted); font-size: .9em; }
+</style>
+
+<div id="t"></div>
+
+<script>
+    // Initial state of the instance; afterwards the module pushes the complete state as JSON.
+    let state = /*INITIAL_STATE*/null;
+
+    const params = new URLSearchParams(window.location.search);
+    const px = (name, fallback) => {
+        const value = parseFloat(params.get(name));
+        return isNaN(value) ? fallback : value;
+    };
+    const padTop = px('margintop', 15), padSide = px('marginside', 15), padBottom = px('marginbottom', 15);
+    const box = document.getElementById('t');
+    box.style.padding = `${padTop}px ${padSide}px ${padBottom}px`;
+    // The visualization reserves a larger top margin when it draws a title bar itself.
+    if (padTop >= 40) {
+        document.body.classList.add('titled');
+    }
+
+    const T = (text) => (typeof translate === 'function' ? translate(text) : text);
+    // Values come from variable formatting and names from the configuration: never treat them as markup.
+    const E = (text) => String(text ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const num = (value, digits = 0) => Number(value).toLocaleString(undefined, { minimumFractionDigits: digits, maximumFractionDigits: digits });
+    const has = (value) => value !== undefined && value !== null && value !== '';
+    // Symcon's own icons are registered under the kit prefix only, so the family is chosen per icon.
+    const isKitIcon = (name) => {
+        try {
+            return !!window['___FONT_AWESOME___'].styles.fak[name];
+        } catch (e) {
+            return false;
+        }
+    };
+    const icon = (name) => `<i class="${isKitIcon(name) ? 'fa-kit' : 'fa-light'} fa-${E(name)}"></i>`;
+
+    // Meteorological direction (wind FROM) as compass text; the arrow shows where the wind blows to.
+    const compass = (deg) => T(['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'][Math.round(((deg % 360) + 360) % 360 / 45) % 8]);
+    const uvClass = (uv) => (uv >= 11 ? 'uv11' : uv >= 8 ? 'uv8' : uv >= 6 ? 'uv6' : uv >= 3 ? 'uv3' : 'uv0');
+
+    const kpis = (items) => {
+        const visible = items.filter((i) => has(i[0]));
+        return visible.length ? `<div class="kpis">${visible.map(([value, label, p]) => `<div class="kpi" ${p ? `data-p="${p}"` : ''}><div class="v">${E(value)}</div><div class="l">${E(label)}</div></div>`).join('')}</div>` : '';
+    };
+
+    function windBlock(s) {
+        if (!has(s.windSpeed) && !has(s.windDir)) {
+            return '';
+        }
+        const arrow = has(s.windDir) ? `<span class="wi" style="display:inline-block;transform:rotate(${(Number(s.windDir) + 180) % 360}deg)">${icon('arrow-up')}</span>` : `<span class="wi">${icon('wind')}</span>`;
+        const direction = has(s.windDir) ? `${compass(Number(s.windDir))} · ` : '';
+        return `<div class="wind">${arrow}<div class="wd">
+            <div class="ws">${E(direction)}${E(s.windSpeed ?? '')}</div>
+            ${has(s.windGust) ? `<div class="wg wide-only" data-p="6">${E(T('Gust %s').replace('%s', s.windGust))}</div>` : ''}
+        </div></div>`;
+    }
+
+    function rainBlock(s) {
+        if (!has(s.rainToday) && !s.rain) {
+            return '';
+        }
+        let graph = '';
+        if (s.rain && Array.isArray(s.rain.values)) {
+            const values = s.rain.values;
+            const hour = Number(s.rain.hour ?? 23);
+            const max = Math.max(...values.map((v) => Number(v) || 0), 0.1);
+            const bars = values.map((v, h) => {
+                if (h > hour) {
+                    return `<i class="future"></i>`;
+                }
+                const value = Number(v) || 0;
+                const height = value > 0 ? Math.max(3, Math.round(value / max * 100)) : 0;
+                return `<i class="${value > 0 ? '' : 'zero'}" style="height:${height}%" title="${h}:00 · ${num(value, value % 1 ? 1 : 0)} mm"></i>`;
+            }).join('');
+            graph = `<div data-p="3"><div class="rgraph">${bars}</div><div class="rlabels"><span>0</span><span>6</span><span>12</span><span>18</span><span>24</span></div></div>`;
+        }
+        return `<div class="rain"><div class="r"><span>${E(T('Rain today'))}</span><span>${E(s.rainToday ?? '')}</span></div>${graph}</div>`;
+    }
+
+    function render() {
+        if (!state) {
+            return;
+        }
+        if (state.inactive) {
+            box.innerHTML = `<div class="empty">${E(T('Instance inactive'))}</div>`;
+            return;
+        }
+        const uvChip = has(state.uv) ? `<span class="chip ${uvClass(Number(state.uv))}">UV ${num(Number(state.uv), Number(state.uv) % 1 ? 1 : 0)}</span>` : '';
+        const sub = has(state.feels) ? T('Feels like %s').replace('%s', state.feels) : '';
+        box.innerHTML = `<div class="head">
+                <div class="ic">${icon(state.icon)}</div>
+                <div class="ht"><div class="name">${E(state.name)}</div>${sub ? `<div class="sub">${E(sub)}</div>` : ''}</div>
+                ${uvChip}
+            </div>
+            <div class="main">${has(state.temperature) ? `<div class="temp">${E(state.temperature)}</div>` : ''}${windBlock(state)}</div>
+            ${kpis([
+                [state.humidity, T('Humidity')],
+                [state.dewpoint, T('Dew point'), 4],
+                [state.pressure, T('Air pressure'), 5]
+            ])}
+            ${rainBlock(state)}`;
+        fit();
+    }
+
+    // Fits the content into the tile: everything marked with data-p is hidden,
+    // the highest number first, until nothing overflows.
+    function fit() {
+        const width = box.clientWidth - padSide * 2;
+        document.body.classList.toggle('narrow', width < 200);
+        box.querySelectorAll('.hid').forEach((e) => e.classList.remove('hid'));
+        const overflow = () => box.scrollHeight > box.clientHeight + 1;
+        const steps = [...new Set([...box.querySelectorAll('[data-p]')].map((e) => Number(e.dataset.p)))].sort((a, b) => b - a);
+        for (const step of steps) {
+            if (!overflow()) {
+                break;
+            }
+            const items = [...box.querySelectorAll(`[data-p="${step}"]`)].reverse();
+            for (const item of items) {
+                if (!overflow()) {
+                    break;
+                }
+                item.classList.add('hid');
+            }
+        }
+    }
+
+    window.handleMessage = (data) => {
+        state = typeof data === 'string' ? JSON.parse(data) : data;
+        render();
+    };
+
+    window.addEventListener('resize', fit);
+    if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(fit);
+    }
+    render();
+</script>

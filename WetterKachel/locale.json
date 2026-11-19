@@ -1,0 +1,31 @@
+{
+    "translations": {
+        "de": {
+            "Weather Tile": "Wetter-Kachel",
+            "Assign the variables of your weather station. Every variable is optional - missing values are simply not shown.": "Variablen der Wetterstation zuordnen. Jede Variable ist optional - fehlende Werte werden einfach nicht angezeigt.",
+            "Name (empty = instance name)": "Name (leer = Instanzname)",
+            "Icon": "Icon",
+            "Variables": "Variablen",
+            "Temperature": "Temperatur",
+            "Feels like": "Gefühlte Temperatur",
+            "Humidity": "Luftfeuchte",
+            "Dew point": "Taupunkt",
+            "Air pressure": "Luftdruck",
+            "UV index": "UV-Index",
+            "Wind speed": "Windgeschwindigkeit",
+            "Wind direction (degrees)": "Windrichtung (Grad)",
+            "Wind gust": "Windböe",
+            "Rain today": "Regen heute",
+            "Rain graph source (logged)": "Regen-Graph-Quelle (geloggt)",
+            "Rain graph: a logged, cumulative rain amount (e.g. rain per day) - the tile shows the amount per hour for today from the archive.": "Regen-Graph: eine geloggte, kumulierte Regenmenge (z.B. Regenmenge Tag) - die Kachel zeigt daraus die Menge pro Stunde für heute aus dem Archiv.",
+            "Instance is active": "Instanz ist aktiv",
+            "No variables configured yet": "Noch keine Variablen konfiguriert",
+            "Instance inactive": "Instanz inaktiv",
+            "Feels like %s": "Gefühlt %s",
+            "Wind": "Wind",
+            "Gust %s": "Böe %s",
+            "no rain yet": "noch kein Regen",
+            "N": "N", "NE": "NO", "E": "O", "SE": "SO", "S": "S", "SW": "SW", "W": "W", "NW": "NW"
+        }
+    }
+}

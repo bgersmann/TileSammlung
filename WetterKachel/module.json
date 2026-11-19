@@ -1,0 +1,17 @@
+{
+    "id": "{6D7BE334-99ED-4547-8171-B1CF2DD3FB25}",
+    "name": "WetterKachel",
+    "type": 3,
+    "vendor": "",
+    "aliases": [
+        "Wetter Kachel",
+        "Wetter Übersicht"
+    ],
+    "parentRequirements": [],
+    "childRequirements": [],
+    "implemented": [
+        "{6E3E09BC-4C83-0ABF-4C97-7E7B8C70A64E}"
+    ],
+    "prefix": "TSWK",
+    "url": ""
+}

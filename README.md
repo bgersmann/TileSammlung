@@ -48,6 +48,18 @@ angezeigt werden; das Icon kommt aus der Liste, sonst vom Objekt, sonst ein Stan
 
 Das Raster passt Zellgröße und Schrift automatisch an die Kachelgröße an.
 
+### WetterKachel
+
+Wetterübersicht in einer Kachel: große Temperatur mit „Gefühlt …" darunter, UV-Index als
+farbiger Chip (grün/gelb/orange/rot/violett nach Index), Wind mit gedrehtem Richtungspfeil,
+Himmelsrichtung, Geschwindigkeit und optionaler Böe, Kennzahlen für Luftfeuchte, Taupunkt
+und Luftdruck sowie der Regen von heute mit einem kleinen Stundengraphen.
+
+Alle Variablen sind optional. Der Regen-Graph liest die Stundenmengen aus dem Archiv:
+als Quelle eine **geloggte, kumulierte Regenmenge** (z. B. „Regenmenge Tag") angeben;
+pro Stunde wird Max−Min gebildet (bei Zähler-Aggregation direkt die Menge), gecacht für
+5 Minuten. Die Windrichtung erwartet Grad (0–360), der Pfeil zeigt die Strömungsrichtung.
+
 ## Eigene Kacheln ergänzen
 
 Neues Modulverzeichnis neben `HausgeraeteKachel` anlegen, `libs/TileHelper.php` einbinden

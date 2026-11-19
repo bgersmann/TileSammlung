@@ -1,0 +1,80 @@
+{
+    "elements": [
+        {
+            "type": "Label",
+            "bold": true,
+            "caption": "Weather Tile"
+        },
+        {
+            "type": "Label",
+            "caption": "Assign the variables of your weather station. Every variable is optional - missing values are simply not shown."
+        },
+        {
+            "type": "RowLayout",
+            "items": [
+                {
+                    "type": "ValidationTextBox",
+                    "name": "Name",
+                    "caption": "Name (empty = instance name)"
+                },
+                {
+                    "type": "ValidationTextBox",
+                    "name": "Icon",
+                    "caption": "Icon"
+                }
+            ]
+        },
+        {
+            "type": "ExpansionPanel",
+            "caption": "Variables",
+            "expanded": true,
+            "items": [
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        { "type": "SelectVariable", "name": "TemperatureID", "caption": "Temperature" },
+                        { "type": "SelectVariable", "name": "FeelsID", "caption": "Feels like" }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        { "type": "SelectVariable", "name": "HumidityID", "caption": "Humidity" },
+                        { "type": "SelectVariable", "name": "DewpointID", "caption": "Dew point" }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        { "type": "SelectVariable", "name": "PressureID", "caption": "Air pressure" },
+                        { "type": "SelectVariable", "name": "UVID", "caption": "UV index" }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        { "type": "SelectVariable", "name": "WindSpeedID", "caption": "Wind speed" },
+                        { "type": "SelectVariable", "name": "WindDirID", "caption": "Wind direction (degrees)" },
+                        { "type": "SelectVariable", "name": "WindGustID", "caption": "Wind gust" }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        { "type": "SelectVariable", "name": "RainTodayID", "caption": "Rain today" },
+                        { "type": "SelectVariable", "name": "RainGraphID", "caption": "Rain graph source (logged)" }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "Label",
+            "caption": "Rain graph: a logged, cumulative rain amount (e.g. rain per day) - the tile shows the amount per hour for today from the archive."
+        }
+    ],
+    "actions": [],
+    "status": [
+        { "code": 102, "icon": "active", "caption": "Instance is active" },
+        { "code": 104, "icon": "inactive", "caption": "No variables configured yet" }
+    ]
+}
