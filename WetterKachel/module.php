@@ -100,8 +100,25 @@ class WetterKachel extends IPSModuleStrict
             'windGust'    => $this->TileFormatted($this->ReadPropertyInteger('WindGustID')),
             'windDir'     => is_numeric($windDirRaw) ? (float) $windDirRaw : null,
             'rainToday'   => $this->TileFormatted($this->ReadPropertyInteger('RainTodayID')),
-            'rain'        => $this->RainGraph()
+            'rain'        => $this->RainGraph(),
+            'open'        => [
+                'temperature' => $this->OpenID('TemperatureID'),
+                'feels'       => $this->OpenID('FeelsID'),
+                'humidity'    => $this->OpenID('HumidityID'),
+                'dewpoint'    => $this->OpenID('DewpointID'),
+                'pressure'    => $this->OpenID('PressureID'),
+                'uv'          => $this->OpenID('UVID'),
+                'wind'        => $this->OpenID('WindSpeedID'),
+                'rain'        => $this->OpenID('RainTodayID') ?: $this->OpenID('RainGraphID')
+            ]
         ];
+    }
+
+    /** Variablen-ID für das Öffnen per Klick, 0 wenn nicht konfiguriert. */
+    private function OpenID(string $property): int
+    {
+        $id = $this->ReadPropertyInteger($property);
+        return ($id > 0 && IPS_VariableExists($id)) ? $id : 0;
     }
 
     /**

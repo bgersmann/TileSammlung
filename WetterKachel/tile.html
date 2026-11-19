@@ -61,6 +61,7 @@
     .rgraph i.future { height: 2px !important; background: transparent; border-top: 2px dotted var(--track); border-radius: 0; }
     .rlabels { display: flex; justify-content: space-between; font-size: .64em; color: var(--muted); margin-top: 2px; }
 
+    [data-open] { cursor: pointer; }
     .empty { margin: auto; text-align: center; color: var(--muted); font-size: .9em; }
 </style>
 
@@ -102,9 +103,15 @@
     const compass = (deg) => T(['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'][Math.round(((deg % 360) + 360) % 360 / 45) % 8]);
     const uvClass = (uv) => (uv >= 11 ? 'uv11' : uv >= 8 ? 'uv8' : uv >= 6 ? 'uv6' : uv >= 3 ? 'uv3' : 'uv0');
 
+    // Clicking a value opens its variable in the visualization.
+    const openAttr = (key) => {
+        const id = state && state.open ? Number(state.open[key] || 0) : 0;
+        return id > 0 ? `data-open="${id}"` : '';
+    };
+
     const kpis = (items) => {
         const visible = items.filter((i) => has(i[0]));
-        return visible.length ? `<div class="kpis">${visible.map(([value, label, p]) => `<div class="kpi" ${p ? `data-p="${p}"` : ''}><div class="v">${E(value)}</div><div class="l">${E(label)}</div></div>`).join('')}</div>` : '';
+        return visible.length ? `<div class="kpis">${visible.map(([value, label, p, key]) => `<div class="kpi" ${p ? `data-p="${p}"` : ''} ${key ? openAttr(key) : ''}><div class="v">${E(value)}</div><div class="l">${E(label)}</div></div>`).join('')}</div>` : '';
     };
 
     function windBlock(s) {
@@ -113,7 +120,7 @@
         }
         const arrow = has(s.windDir) ? `<span class="wi" style="display:inline-block;transform:rotate(${(Number(s.windDir) + 180) % 360}deg)">${icon('arrow-up')}</span>` : `<span class="wi">${icon('wind')}</span>`;
         const direction = has(s.windDir) ? `${compass(Number(s.windDir))} · ` : '';
-        return `<div class="wind">${arrow}<div class="wd">
+        return `<div class="wind" ${openAttr('wind')}>${arrow}<div class="wd">
             <div class="ws">${E(direction)}${E(s.windSpeed ?? '')}</div>
             ${has(s.windGust) ? `<div class="wg wide-only" data-p="6">${E(T('Gust %s').replace('%s', s.windGust))}</div>` : ''}
         </div></div>`;
@@ -138,7 +145,7 @@
             }).join('');
             graph = `<div data-p="3"><div class="rgraph">${bars}</div><div class="rlabels"><span>0</span><span>6</span><span>12</span><span>18</span><span>24</span></div></div>`;
         }
-        return `<div class="rain"><div class="r"><span>${E(T('Rain today'))}</span><span>${E(s.rainToday ?? '')}</span></div>${graph}</div>`;
+        return `<div class="rain" ${openAttr('rain')}><div class="r"><span>${E(T('Rain today'))}</span><span>${E(s.rainToday ?? '')}</span></div>${graph}</div>`;
     }
 
     function render() {
@@ -149,18 +156,18 @@
             box.innerHTML = `<div class="empty">${E(T('Instance inactive'))}</div>`;
             return;
         }
-        const uvChip = has(state.uv) ? `<span class="chip ${uvClass(Number(state.uv))}">UV ${num(Number(state.uv), Number(state.uv) % 1 ? 1 : 0)}</span>` : '';
+        const uvChip = has(state.uv) ? `<span class="chip ${uvClass(Number(state.uv))}" ${openAttr('uv')}>UV ${num(Number(state.uv), Number(state.uv) % 1 ? 1 : 0)}</span>` : '';
         const sub = has(state.feels) ? T('Feels like %s').replace('%s', state.feels) : '';
         box.innerHTML = `<div class="head">
                 <div class="ic">${icon(state.icon)}</div>
-                <div class="ht"><div class="name">${E(state.name)}</div>${sub ? `<div class="sub">${E(sub)}</div>` : ''}</div>
+                <div class="ht"><div class="name">${E(state.name)}</div>${sub ? `<div class="sub" ${openAttr('feels')}>${E(sub)}</div>` : ''}</div>
                 ${uvChip}
             </div>
-            <div class="main">${has(state.temperature) ? `<div class="temp">${E(state.temperature)}</div>` : ''}${windBlock(state)}</div>
+            <div class="main">${has(state.temperature) ? `<div class="temp" ${openAttr('temperature')}>${E(state.temperature)}</div>` : ''}${windBlock(state)}</div>
             ${kpis([
-                [state.humidity, T('Humidity')],
-                [state.dewpoint, T('Dew point'), 4],
-                [state.pressure, T('Air pressure'), 5]
+                [state.humidity, T('Humidity'), 0, 'humidity'],
+                [state.dewpoint, T('Dew point'), 4, 'dewpoint'],
+                [state.pressure, T('Air pressure'), 5, 'pressure']
             ])}
             ${rainBlock(state)}`;
         fit();
@@ -192,6 +199,13 @@
         state = typeof data === 'string' ? JSON.parse(data) : data;
         render();
     };
+
+    box.addEventListener('click', (event) => {
+        const target = event.target.closest('[data-open]');
+        if (target && typeof openObject === 'function') {
+            openObject(Number(target.dataset.open));
+        }
+    });
 
     window.addEventListener('resize', fit);
     if (document.fonts && document.fonts.ready) {
