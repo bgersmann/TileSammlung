@@ -58,6 +58,25 @@
     .row span:first-child { color: var(--muted); white-space: nowrap; }
     .row span:last-child { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
+    .grp { display: flex; align-items: center; gap: .6em; min-width: 0; margin-top: .2em;
+           font-size: .74em; color: var(--muted); flex: none; }
+    .grp span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .grp::before { content: ""; width: 3px; height: 1em; border-radius: 2px; background: var(--accent-color); flex: none; }
+    .grp::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+
+    .toggle { width: 38px; height: 22px; border-radius: 11px; border: 0; background: var(--track); position: relative; cursor: pointer; flex: none; padding: 0; }
+    .toggle::after { content: ""; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: var(--content-color); transition: left .15s; }
+    .toggle[aria-checked=true] { background: var(--accent-color); }
+    .toggle[aria-checked=true]::after { left: 19px; background: var(--on-accent, #101114); }
+    .toggle.noaction { opacity: .5; cursor: default; }
+
+    .stpr { display: inline-flex; align-items: center; gap: 6px; }
+    .stp { width: 24px; height: 24px; border-radius: 50%; border: 0; background: var(--track); color: inherit;
+           font: inherit; font-size: 1em; line-height: 1; cursor: pointer; flex: none; padding: 0; transition: transform .1s; }
+    .stp:active { transform: scale(.9); }
+    .stp:disabled { opacity: .4; cursor: default; }
+    .socv { min-width: 3.2em; text-align: center; white-space: nowrap; }
+
     .week { flex: none; min-width: 0; }
     .week .r { display: flex; justify-content: space-between; gap: .5em; font-size: .76em; line-height: 1.35; color: var(--muted); }
     .week .r span:last-child { color: var(--content-color); white-space: nowrap; }
@@ -128,6 +147,39 @@
         return visible.length ? `<div class="rows">${visible.map(([key, value, p, openKey], i) => `<div class="row ${i === 0 ? 'first' : ''}" ${p ? `data-p="${p}"` : ''} ${openKey ? openAttr(openKey) : ''}><span>${E(key)}</span><span>${E(value)}</span></div>`).join('')}</div>` : '';
     };
 
+    // Zielladen-Sektion: schaltbare Bools, Ziel-Ladestand per +/- und Anzeige-Zeilen.
+    function chargeBlock(s) {
+        const parts = [];
+        const row = (label, inner, p, extra = '') => `<div class="row ${parts.length === 0 ? 'first' : ''}" ${p ? `data-p="${p}"` : ''} ${extra}><span>${E(label)}</span>${inner}</div>`;
+        const toggle = (t) => `<button class="toggle ${t.action ? '' : 'noaction'}" role="switch" aria-checked="${t.on}" ${t.action ? `data-toggle="${Number(t.id)}"` : `data-open="${Number(t.id)}"`}></button>`;
+        if (s.chargeActive) {
+            parts.push(row(T('Active'), toggle(s.chargeActive)));
+        }
+        if (s.targetSoc) {
+            const soc = s.targetSoc;
+            const inner = soc.action
+                ? `<span class="stpr"><button class="stp" data-adjust="-1" ${soc.value <= soc.min ? 'disabled' : ''}>−</button><span class="socv">${E(soc.text)}</span><button class="stp" data-adjust="1" ${soc.value >= soc.max ? 'disabled' : ''}>+</button></span>`
+                : `<span ${openAttr('targetSoc')}>${E(soc.text)}</span>`;
+            parts.push(row(T('Target SOC'), inner));
+        }
+        if (s.targetDateUse) {
+            parts.push(row(T('Use target date'), toggle(s.targetDateUse), 5));
+        }
+        if (has(s.targetDate)) {
+            parts.push(row(T('Target date'), `<span>${E(s.targetDate)}</span>`, 6, openAttr('targetDate')));
+        }
+        if (has(s.fullPower)) {
+            parts.push(row(T('Full power from'), `<span>${E(s.fullPower)}</span>`, 9, openAttr('fullPower')));
+        }
+        if (has(s.chargeTarget)) {
+            parts.push(row(T('Status'), `<span>${E(s.chargeTarget)}</span>`, 7, openAttr('chargeTarget')));
+        }
+        if (!parts.length) {
+            return '';
+        }
+        return `<div class="grp"><span>${E(T('Target charging'))}</span></div><div class="rows">${parts.join('')}</div>`;
+    }
+
     function render() {
         if (!state) {
             return;
@@ -175,12 +227,12 @@
             ])}
             ${rows([
                 [T('Charge mode'), state.chargeMode, 0, 'chargeMode'],
-                [T('Target charging'), state.chargeTarget, 4, 'chargeTarget'],
-                [T('Phases'), [state.phaseMode, state.phasesActive].filter(has).join(' · '), 5, 'phaseMode'],
-                [T('Doors'), state.doors, 6, 'doors'],
-                [T('Windows'), state.windows, 7, 'windows'],
-                [T('Trunk'), state.trunk, 8, 'trunk']
+                [T('Phases'), [state.phaseMode, state.phasesActive].filter(has).join(' · '), 8, 'phaseMode'],
+                [T('Doors'), state.doors, 10, 'doors'],
+                [T('Windows'), state.windows, 11, 'windows'],
+                [T('Trunk'), state.trunk, 12, 'trunk']
             ])}
+            ${chargeBlock(state)}
             ${week}
             ${foot}`;
         fit();
@@ -214,6 +266,37 @@
     };
 
     box.addEventListener('click', (event) => {
+        // Zielladen-Schalter: sofortiges Feedback, der Push des Moduls bestätigt danach.
+        const toggle = event.target.closest('[data-toggle]');
+        if (toggle) {
+            const id = Number(toggle.dataset.toggle);
+            if (state.chargeActive && state.chargeActive.id === id) {
+                state.chargeActive.on = !state.chargeActive.on;
+            }
+            if (state.targetDateUse && state.targetDateUse.id === id) {
+                state.targetDateUse.on = !state.targetDateUse.on;
+            }
+            render();
+            if (typeof requestAction === 'function') {
+                requestAction('Toggle', id);
+            }
+            return;
+        }
+        // Ziel-Ladestand per +/- in Schrittweite der Darstellung verstellen.
+        const adjust = event.target.closest('[data-adjust]');
+        if (adjust && state.targetSoc) {
+            const soc = state.targetSoc;
+            const next = Math.max(soc.min, Math.min(soc.max, soc.value + Number(adjust.dataset.adjust) * soc.step));
+            if (next !== soc.value) {
+                soc.text = soc.text.replace(/-?[\d.,]+/, String(next));
+                soc.value = next;
+                render();
+                if (typeof requestAction === 'function') {
+                    requestAction('SetValue', JSON.stringify({ id: soc.id, value: next }));
+                }
+            }
+            return;
+        }
         const target = event.target.closest('[data-open]');
         if (target && typeof openObject === 'function') {
             openObject(Number(target.dataset.open));

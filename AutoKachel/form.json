@@ -69,7 +69,7 @@
                     "type": "RowLayout",
                     "items": [
                         { "type": "SelectVariable", "name": "ChargeModeID", "caption": "Charge mode" },
-                        { "type": "SelectVariable", "name": "ChargeTargetID", "caption": "Target charging" }
+                        { "type": "SelectVariable", "name": "ChargeTargetID", "caption": "Target charging status" }
                     ]
                 },
                 {
@@ -78,8 +78,27 @@
                         { "type": "SelectVariable", "name": "PhaseModeID", "caption": "Phase mode" },
                         { "type": "SelectVariable", "name": "PhasesActiveID", "caption": "Active phases" }
                     ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        { "type": "SelectVariable", "name": "ChargeActiveID", "caption": "Target charging active (bool)" },
+                        { "type": "SelectVariable", "name": "TargetSocID", "caption": "Target SOC (slider variable)" }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        { "type": "SelectVariable", "name": "TargetDateUseID", "caption": "Use target date (bool)" },
+                        { "type": "SelectVariable", "name": "TargetDateID", "caption": "Target date" },
+                        { "type": "SelectVariable", "name": "FullPowerID", "caption": "Full power from" }
+                    ]
                 }
             ]
+        },
+        {
+            "type": "Label",
+            "caption": "Target charging: active/use date are toggled in the tile, the target SOC is adjusted with +/- (limits and step from its presentation). Variables need an action."
         },
         {
             "type": "Label",
