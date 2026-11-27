@@ -1,0 +1,17 @@
+{
+    "id": "{B5A482A7-47F6-4B80-9C33-3BA44CD59598}",
+    "name": "AutoKachel",
+    "type": 3,
+    "vendor": "",
+    "aliases": [
+        "Auto Kachel",
+        "Fahrzeug Kachel"
+    ],
+    "parentRequirements": [],
+    "childRequirements": [],
+    "implemented": [
+        "{6E3E09BC-4C83-0ABF-4C97-7E7B8C70A64E}"
+    ],
+    "prefix": "TSAK",
+    "url": ""
+}

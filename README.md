@@ -60,6 +60,24 @@ als Quelle eine **geloggte, kumulierte Regenmenge** (z. B. „Regenmenge Tag") a
 pro Stunde wird Max−Min gebildet (bei Zähler-Aggregation direkt die Menge), gecacht für
 5 Minuten. Die Windrichtung erwartet Grad (0–360), der Pfeil zeigt die Strömungsrichtung.
 
+### AutoKachel
+
+Fahrzeugübersicht – eine Instanz pro Auto: Tank-/Akkustand als Balken (gelb ≤ 20 %,
+rot ≤ 10 %), Reichweite und Kilometerstand als Kennzahlen, Verriegelung (Status-Punkt:
+grün = verriegelt, gelb = offen; Vergleichstext einstellbar), Türen/Fenster/Kofferraum
+als Zeilen, unten Parkadresse und letzte Aktualisierung. Alle Variablen optional –
+passt damit auch für Autos mit wenigen Datenpunkten. Klick auf einen Wert öffnet die
+Variable.
+
+### HundKachel
+
+Haustier-Tracker (z. B. Tractive) – eine Instanz pro Tier: Status und „Unterwegs" in
+der Kopfzeile (pulsierender gelber Punkt bei unterwegs), Akku als Balken, Signalton /
+Signallicht / Live-Tracking als Schalter (nur Bool-Variablen mit Aktion; aktiv =
+Akzentfarbe), Geschwindigkeit und Positionsgenauigkeit als Kennzahlen, Zeilen für
+letzte Positionsmeldung, Schlafzeiten, Sensor und Höhe. Klick auf einen Wert öffnet
+die Variable.
+
 ## Eigene Kacheln ergänzen
 
 Neues Modulverzeichnis neben `HausgeraeteKachel` anlegen, `libs/TileHelper.php` einbinden

@@ -1,0 +1,18 @@
+{
+    "id": "{936EC241-B6A9-49F1-8328-546CAB98CA22}",
+    "name": "HundKachel",
+    "type": 3,
+    "vendor": "",
+    "aliases": [
+        "Hund Kachel",
+        "Tractive Kachel",
+        "Haustier Kachel"
+    ],
+    "parentRequirements": [],
+    "childRequirements": [],
+    "implemented": [
+        "{6E3E09BC-4C83-0ABF-4C97-7E7B8C70A64E}"
+    ],
+    "prefix": "TSHU",
+    "url": ""
+}

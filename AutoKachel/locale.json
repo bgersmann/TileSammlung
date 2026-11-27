@@ -1,0 +1,27 @@
+{
+    "translations": {
+        "de": {
+            "Car Tile": "Auto-Kachel",
+            "Assign the variables of the car. Every variable is optional - missing values are simply not shown.": "Variablen des Fahrzeugs zuordnen. Jede Variable ist optional - fehlende Werte werden einfach nicht angezeigt.",
+            "Name (empty = instance name)": "Name (leer = Instanzname)",
+            "Icon": "Icon",
+            "Variables": "Variablen",
+            "Fuel / battery level (%)": "Tank-/Akkustand (%)",
+            "Range": "Reichweite",
+            "Mileage": "Kilometerstand",
+            "Parking state": "Parkstatus",
+            "Lock state": "Verriegelung",
+            "Text that counts as locked": "Text, der als verriegelt gilt",
+            "Doors": "Türen",
+            "Windows": "Fenster",
+            "Trunk": "Kofferraum",
+            "Parking address": "Parkadresse",
+            "Last update": "Letzte Aktualisierung",
+            "Icon: any Font Awesome name, e.g. car-side, car, charging-station, truck-pickup.": "Icon: beliebiger Font-Awesome-Name, z.B. car-side, car, charging-station, truck-pickup.",
+            "Instance is active": "Instanz ist aktiv",
+            "No variables configured yet": "Noch keine Variablen konfiguriert",
+            "Instance inactive": "Instanz inaktiv",
+            "Level": "Füllstand"
+        }
+    }
+}

@@ -1,0 +1,167 @@
+<?php
+
+declare(strict_types=1);
+
+require_once __DIR__ . '/../libs/TileHelper.php';
+
+/**
+ * HTML-SDK-Kachel: Haustier-Tracker (z. B. Tractive) - eine Instanz pro Tier.
+ *
+ * Zeigt Status, Akkustand als Balken, Geschwindigkeit und Positionsgenauigkeit,
+ * letzte Positionsmeldung, Sensor und Schlafzeiten. Die Tracker-Funktionen
+ * Signalton, Signallicht und Live-Tracking sind als Schalter bedienbar (nur
+ * Bool-Variablen mit Aktion). Jede Variable ist optional; Klick auf einen Wert
+ * öffnet die Variable.
+ */
+class HundKachel extends IPSModuleStrict
+{
+    use TileHelper;
+
+    private const VARIABLE_PROPERTIES = ['StatusID', 'BatteryID', 'AwayID', 'SpeedID', 'AccuracyID', 'SensorID', 'AltitudeID', 'LastPosID', 'DaySleepID', 'NightSleepID', 'RestID', 'SoundID', 'LightID', 'LiveID'];
+    private const SWITCH_PROPERTIES = ['SoundID', 'LightID', 'LiveID'];
+
+    public function Create(): void
+    {
+        //Never delete this line!
+        parent::Create();
+
+        $this->RegisterPropertyString('Name', '');
+        $this->RegisterPropertyString('Icon', 'dog');
+        foreach (self::VARIABLE_PROPERTIES as $property) {
+            $this->RegisterPropertyInteger($property, 0);
+        }
+        $this->SetVisualizationType(defined('INSTANCE_VISUALIZATION_TYPE_HTML') ? constant('INSTANCE_VISUALIZATION_TYPE_HTML') : 1);
+    }
+
+    public function Destroy(): void
+    {
+        //Never delete this line!
+        parent::Destroy();
+    }
+
+    public function ApplyChanges(): void
+    {
+        //Never delete this line!
+        parent::ApplyChanges();
+        $this->SetVisualizationType(defined('INSTANCE_VISUALIZATION_TYPE_HTML') ? constant('INSTANCE_VISUALIZATION_TYPE_HTML') : 1);
+
+        // Nachrichten und Referenzen passend zur Konfiguration neu aufbauen.
+        foreach ($this->GetMessageList() as $senderID => $messages) {
+            foreach ($messages as $message) {
+                $this->UnregisterMessage($senderID, $message);
+            }
+        }
+        foreach ($this->GetReferenceList() as $referenceID) {
+            $this->UnregisterReference($referenceID);
+        }
+        $count = 0;
+        foreach (self::VARIABLE_PROPERTIES as $property) {
+            $id = $this->ReadPropertyInteger($property);
+            if ($id > 0 && IPS_VariableExists($id)) {
+                $count++;
+                $this->RegisterReference($id);
+                $this->RegisterMessage($id, VM_UPDATE);
+            }
+        }
+
+        $this->SetStatus($count > 0 ? IS_ACTIVE : IS_INACTIVE);
+        $this->TilePush();
+    }
+
+    public function MessageSink(int $TimeStamp, int $SenderID, int $Message, array $Data): void
+    {
+        if ($Message === VM_UPDATE) {
+            $this->TilePush();
+        }
+    }
+
+    /** Tipp auf einen Schalter: nur die konfigurierten Bool-Variablen mit Aktion. */
+    public function RequestAction(string $ident, mixed $value): void
+    {
+        if ($ident !== 'Press') {
+            throw new Exception('Invalid ident: ' . $ident);
+        }
+        $objectID = (int) $value;
+        $allowed = false;
+        foreach (self::SWITCH_PROPERTIES as $property) {
+            if ($this->ReadPropertyInteger($property) === $objectID) {
+                $allowed = true;
+                break;
+            }
+        }
+        if (!$allowed) {
+            throw new Exception('Object not configured: ' . $objectID);
+        }
+        if (IPS_VariableExists($objectID) && IPS_GetVariable($objectID)['VariableType'] === VARIABLETYPE_BOOLEAN && HasAction($objectID)) {
+            RequestAction($objectID, !GetValueBoolean($objectID));
+            $this->TilePush();
+        }
+    }
+
+    private function TileFile(): string
+    {
+        return __DIR__ . '/tile.html';
+    }
+
+    private function TileState(): array
+    {
+        $batteryRaw = $this->TileRaw($this->ReadPropertyInteger('BatteryID'));
+        $awayRaw = $this->TileRaw($this->ReadPropertyInteger('AwayID'));
+
+        $name = $this->ReadPropertyString('Name');
+        return [
+            'name'      => $name !== '' ? $name : IPS_GetName($this->InstanceID),
+            'icon'      => $this->ReadPropertyString('Icon') !== '' ? $this->ReadPropertyString('Icon') : 'dog',
+            'status'    => $this->TileFormatted($this->ReadPropertyInteger('StatusID')),
+            'battery'   => is_numeric($batteryRaw) ? (float) $batteryRaw : null,
+            'batteryText' => $this->TileFormatted($this->ReadPropertyInteger('BatteryID')),
+            'away'      => is_bool($awayRaw) ? $awayRaw : null,
+            'awayText'  => $this->TileFormatted($this->ReadPropertyInteger('AwayID')),
+            'speed'     => $this->TileFormatted($this->ReadPropertyInteger('SpeedID')),
+            'accuracy'  => $this->TileFormatted($this->ReadPropertyInteger('AccuracyID')),
+            'sensor'    => $this->TileFormatted($this->ReadPropertyInteger('SensorID')),
+            'altitude'  => $this->TileFormatted($this->ReadPropertyInteger('AltitudeID')),
+            'lastPos'   => $this->TileFormatted($this->ReadPropertyInteger('LastPosID')),
+            'daySleep'  => $this->TileFormatted($this->ReadPropertyInteger('DaySleepID')),
+            'nightSleep'=> $this->TileFormatted($this->ReadPropertyInteger('NightSleepID')),
+            'rest'      => $this->TileFormatted($this->ReadPropertyInteger('RestID')),
+            'switches'  => $this->Switches(),
+            'open'      => $this->OpenIDs()
+        ];
+    }
+
+    /** Schalter-Zustände: nur Bool-Variablen mit Aktion sind bedienbar. */
+    private function Switches(): array
+    {
+        $labels = ['SoundID' => 'Sound', 'LightID' => 'Light', 'LiveID' => 'Live'];
+        $icons = ['SoundID' => 'volume-high', 'LightID' => 'lightbulb', 'LiveID' => 'location-crosshairs'];
+        $switches = [];
+        foreach (self::SWITCH_PROPERTIES as $property) {
+            $id = $this->ReadPropertyInteger($property);
+            if ($id <= 0 || !IPS_VariableExists($id) || IPS_GetVariable($id)['VariableType'] !== VARIABLETYPE_BOOLEAN) {
+                continue;
+            }
+            $switches[] = [
+                'id'     => $id,
+                'label'  => $labels[$property],
+                'icon'   => $icons[$property],
+                'on'     => GetValueBoolean($id),
+                'action' => HasAction($id)
+            ];
+        }
+        return $switches;
+    }
+
+    /** Variablen-IDs für das Öffnen per Klick (nur konfigurierte). */
+    private function OpenIDs(): array
+    {
+        $open = [];
+        foreach (self::VARIABLE_PROPERTIES as $property) {
+            $id = $this->ReadPropertyInteger($property);
+            if ($id > 0 && IPS_VariableExists($id)) {
+                $open[lcfirst(substr($property, 0, -2))] = $id;
+            }
+        }
+        return $open;
+    }
+}

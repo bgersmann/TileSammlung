@@ -1,0 +1,83 @@
+{
+    "elements": [
+        {
+            "type": "Label",
+            "bold": true,
+            "caption": "Pet Tracker Tile"
+        },
+        {
+            "type": "Label",
+            "caption": "Assign the variables of the tracker (e.g. Tractive). Every variable is optional - missing values are simply not shown."
+        },
+        {
+            "type": "RowLayout",
+            "items": [
+                {
+                    "type": "ValidationTextBox",
+                    "name": "Name",
+                    "caption": "Name (empty = instance name)"
+                },
+                {
+                    "type": "ValidationTextBox",
+                    "name": "Icon",
+                    "caption": "Icon"
+                }
+            ]
+        },
+        {
+            "type": "ExpansionPanel",
+            "caption": "Variables",
+            "expanded": true,
+            "items": [
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        { "type": "SelectVariable", "name": "StatusID", "caption": "Tracker state" },
+                        { "type": "SelectVariable", "name": "BatteryID", "caption": "Battery (%)" },
+                        { "type": "SelectVariable", "name": "AwayID", "caption": "On the move (bool)" }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        { "type": "SelectVariable", "name": "SpeedID", "caption": "Speed" },
+                        { "type": "SelectVariable", "name": "AccuracyID", "caption": "Position accuracy" },
+                        { "type": "SelectVariable", "name": "AltitudeID", "caption": "Altitude" }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        { "type": "SelectVariable", "name": "LastPosID", "caption": "Last position report" },
+                        { "type": "SelectVariable", "name": "SensorID", "caption": "Sensor in use" }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        { "type": "SelectVariable", "name": "DaySleepID", "caption": "Day sleep" },
+                        { "type": "SelectVariable", "name": "NightSleepID", "caption": "Night sleep" },
+                        { "type": "SelectVariable", "name": "RestID", "caption": "Rest phase" }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        { "type": "SelectVariable", "name": "SoundID", "caption": "Buzzer (bool)" },
+                        { "type": "SelectVariable", "name": "LightID", "caption": "Light (bool)" },
+                        { "type": "SelectVariable", "name": "LiveID", "caption": "Live tracking (bool)" }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "Label",
+            "caption": "Buzzer, light and live tracking are switchable in the tile when the boolean variable has an action."
+        }
+    ],
+    "actions": [],
+    "status": [
+        { "code": 102, "icon": "active", "caption": "Instance is active" },
+        { "code": 104, "icon": "inactive", "caption": "No variables configured yet" }
+    ]
+}

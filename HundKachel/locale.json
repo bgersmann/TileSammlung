@@ -1,0 +1,37 @@
+{
+    "translations": {
+        "de": {
+            "Pet Tracker Tile": "Haustier-Tracker-Kachel",
+            "Assign the variables of the tracker (e.g. Tractive). Every variable is optional - missing values are simply not shown.": "Variablen des Trackers (z.B. Tractive) zuordnen. Jede Variable ist optional - fehlende Werte werden einfach nicht angezeigt.",
+            "Name (empty = instance name)": "Name (leer = Instanzname)",
+            "Icon": "Icon",
+            "Variables": "Variablen",
+            "Tracker state": "Tracker-Status",
+            "Battery (%)": "Akku (%)",
+            "On the move (bool)": "Unterwegs (Bool)",
+            "Speed": "Geschwindigkeit",
+            "Position accuracy": "Positionsgenauigkeit",
+            "Altitude": "Höhe",
+            "Last position report": "Letzte Positionsmeldung",
+            "Sensor in use": "Verwendeter Sensor",
+            "Day sleep": "Tagschlaf",
+            "Night sleep": "Nachtschlaf",
+            "Rest phase": "Ruhephase",
+            "Buzzer (bool)": "Signalton (Bool)",
+            "Light (bool)": "Signallicht (Bool)",
+            "Live tracking (bool)": "Live-Tracking (Bool)",
+            "Buzzer, light and live tracking are switchable in the tile when the boolean variable has an action.": "Signalton, Signallicht und Live-Tracking sind in der Kachel schaltbar, wenn die Bool-Variable eine Aktion hat.",
+            "Instance is active": "Instanz ist aktiv",
+            "No variables configured yet": "Noch keine Variablen konfiguriert",
+            "Instance inactive": "Instanz inaktiv",
+            "Battery": "Akku",
+            "Accuracy": "Genauigkeit",
+            "Sensor": "Sensor",
+            "Last position": "Letzte Position",
+            "Sound": "Ton",
+            "Light": "Licht",
+            "Live": "Live",
+            "On the move": "Unterwegs"
+        }
+    }
+}

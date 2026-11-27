@@ -1,0 +1,80 @@
+{
+    "elements": [
+        {
+            "type": "Label",
+            "bold": true,
+            "caption": "Car Tile"
+        },
+        {
+            "type": "Label",
+            "caption": "Assign the variables of the car. Every variable is optional - missing values are simply not shown."
+        },
+        {
+            "type": "RowLayout",
+            "items": [
+                {
+                    "type": "ValidationTextBox",
+                    "name": "Name",
+                    "caption": "Name (empty = instance name)"
+                },
+                {
+                    "type": "ValidationTextBox",
+                    "name": "Icon",
+                    "caption": "Icon"
+                }
+            ]
+        },
+        {
+            "type": "ExpansionPanel",
+            "caption": "Variables",
+            "expanded": true,
+            "items": [
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        { "type": "SelectVariable", "name": "LevelID", "caption": "Fuel / battery level (%)" },
+                        { "type": "SelectVariable", "name": "RangeID", "caption": "Range" }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        { "type": "SelectVariable", "name": "MileageID", "caption": "Mileage" },
+                        { "type": "SelectVariable", "name": "ParkID", "caption": "Parking state" }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        { "type": "SelectVariable", "name": "LockID", "caption": "Lock state" },
+                        { "type": "ValidationTextBox", "name": "LockedText", "caption": "Text that counts as locked" }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        { "type": "SelectVariable", "name": "DoorsID", "caption": "Doors" },
+                        { "type": "SelectVariable", "name": "WindowsID", "caption": "Windows" },
+                        { "type": "SelectVariable", "name": "TrunkID", "caption": "Trunk" }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        { "type": "SelectVariable", "name": "AddressID", "caption": "Parking address" },
+                        { "type": "SelectVariable", "name": "UpdatedID", "caption": "Last update" }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "Label",
+            "caption": "Icon: any Font Awesome name, e.g. car-side, car, charging-station, truck-pickup."
+        }
+    ],
+    "actions": [],
+    "status": [
+        { "code": 102, "icon": "active", "caption": "Instance is active" },
+        { "code": 104, "icon": "inactive", "caption": "No variables configured yet" }
+    ]
+}
