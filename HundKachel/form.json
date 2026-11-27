@@ -67,8 +67,17 @@
                         { "type": "SelectVariable", "name": "LightID", "caption": "Light (bool)" },
                         { "type": "SelectVariable", "name": "LiveID", "caption": "Live tracking (bool)" }
                     ]
+                },
+                {
+                    "type": "SelectVariable",
+                    "name": "WalksID",
+                    "caption": "Walks (logged text variable)"
                 }
             ]
+        },
+        {
+            "type": "Label",
+            "caption": "Walks: a logged string variable like '27.11.2026 07:21-08:08 | 5,02 km | 48 min' - the tile shows the last rounds and a week graph with km per day from the archive."
         },
         {
             "type": "Label",

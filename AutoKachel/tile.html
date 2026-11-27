@@ -58,6 +58,15 @@
     .row span:first-child { color: var(--muted); white-space: nowrap; }
     .row span:last-child { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
+    .week { flex: none; min-width: 0; }
+    .week .r { display: flex; justify-content: space-between; gap: .5em; font-size: .76em; line-height: 1.35; color: var(--muted); }
+    .week .r span:last-child { color: var(--content-color); white-space: nowrap; }
+    .wgraph { display: flex; align-items: flex-end; gap: 3px; height: 34px; margin-top: 4px; }
+    .wgraph i { flex: 1 1 0; min-width: 2px; border-radius: 2px 2px 0 0; background: var(--accent-color); }
+    .wgraph i.zero { height: 2px !important; background: var(--track); border-radius: 1px; }
+    .wlabels { display: flex; gap: 3px; font-size: .64em; color: var(--muted); margin-top: 2px; }
+    .wlabels span { flex: 1 1 0; text-align: center; white-space: nowrap; overflow: hidden; }
+
     .foot { margin-top: auto; display: flex; gap: .85em; align-items: center; font-size: .76em; color: var(--muted); min-width: 0; flex: none; }
     .foot span { display: inline-flex; align-items: center; gap: 4px; min-width: 0; }
     .foot .ell { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -136,6 +145,21 @@
             bar = `<div class="barx" ${openAttr('level')}><div class="r"><span>${E(T('Level'))}</span><span>${E(state.levelText ?? `${num(level)} %`)}</span></div>
                 <div class="track"><i class="${cls}" style="width:${level}%"></i></div></div>`;
         }
+        // Gefahrene Kilometer pro Tag der letzten Woche als kleiner Balkengraph.
+        let week = '';
+        if (state.week && Array.isArray(state.week.days)) {
+            const days = state.week.days;
+            const total = days.reduce((sum, d) => sum + (Number(d.v) || 0), 0);
+            const max = Math.max(...days.map((d) => Number(d.v) || 0), 0.1);
+            const bars = days.map((d) => {
+                const value = Number(d.v) || 0;
+                const height = value > 0 ? Math.max(4, Math.round(value / max * 100)) : 0;
+                return `<i class="${value > 0 ? '' : 'zero'}" style="height:${height}%" title="${new Date(d.t * 1000).toLocaleDateString()} · ${num(value, value % 1 ? 1 : 0)} km"></i>`;
+            }).join('');
+            const labels = days.map((d) => `<span>${E(new Date(d.t * 1000).toLocaleDateString(undefined, { weekday: 'short' }).slice(0, 2))}</span>`).join('');
+            week = `<div class="week" data-p="3" ${openAttr('mileage')}><div class="r"><span>${E(T('km this week'))}</span><span>${num(total, total % 1 ? 1 : 0)} km</span></div>
+                <div class="wgraph">${bars}</div><div class="wlabels">${labels}</div></div>`;
+        }
         const foot = (has(state.address) || has(state.updated)) ? `<div class="foot">
                 ${has(state.address) ? `<span class="ell" data-p="2" ${openAttr('address')}>${icon('location-dot')}<span class="ell">${E(state.address)}</span></span>` : ''}
                 ${has(state.updated) ? `<span class="upd wide-only" ${openAttr('updated')}>${icon('clock')}${E(state.updated)}</span>` : ''}
@@ -150,10 +174,14 @@
                 [state.mileage, T('Mileage'), 0, 'mileage']
             ])}
             ${rows([
-                [T('Doors'), state.doors, 3, 'doors'],
-                [T('Windows'), state.windows, 4, 'windows'],
-                [T('Trunk'), state.trunk, 5, 'trunk']
+                [T('Charge mode'), state.chargeMode, 0, 'chargeMode'],
+                [T('Target charging'), state.chargeTarget, 4, 'chargeTarget'],
+                [T('Phases'), [state.phaseMode, state.phasesActive].filter(has).join(' · '), 5, 'phaseMode'],
+                [T('Doors'), state.doors, 6, 'doors'],
+                [T('Windows'), state.windows, 7, 'windows'],
+                [T('Trunk'), state.trunk, 8, 'trunk']
             ])}
+            ${week}
             ${foot}`;
         fit();
     }

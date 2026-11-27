@@ -69,6 +69,11 @@ als Zeilen, unten Parkadresse und letzte Aktualisierung. Alle Variablen optional
 passt damit auch für Autos mit wenigen Datenpunkten. Klick auf einen Wert öffnet die
 Variable.
 
+Zusätzlich optional: **Ladesteuerung** (Lademodus, Zielladen-Status, Phasenmodus ·
+aktive Phasen als Zeilen, z. B. von einer Wattpilot-Wallbox) und ein **Wochen-Graph**
+mit den gefahrenen km pro Tag der letzten 7 Tage aus dem Archiv der
+Kilometerstand-Variable (Max−Min je Tag, 1 h gecacht).
+
 ### HundKachel
 
 Haustier-Tracker (z. B. Tractive) – eine Instanz pro Tier: Status und „Unterwegs" in
@@ -77,6 +82,11 @@ Signallicht / Live-Tracking als Schalter (nur Bool-Variablen mit Aktion; aktiv =
 Akzentfarbe), Geschwindigkeit und Positionsgenauigkeit als Kennzahlen, Zeilen für
 letzte Positionsmeldung, Schlafzeiten, Sensor und Höhe. Klick auf einen Wert öffnet
 die Variable.
+
+**Gassi-Runden (optional):** eine geloggte String-Variable im Format
+`27.11.2026 07:21-08:08 | 5,02 km | 48 min` liefert die letzten drei Runden als Zeilen
+(Datum/Uhrzeit links, km · Minuten rechts) und einen Wochen-Graphen mit der
+Gesamtstrecke pro Tag (aus dem Archiv, 10 min gecacht).
 
 ## Eigene Kacheln ergänzen
 

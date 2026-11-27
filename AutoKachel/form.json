@@ -64,8 +64,26 @@
                         { "type": "SelectVariable", "name": "AddressID", "caption": "Parking address" },
                         { "type": "SelectVariable", "name": "UpdatedID", "caption": "Last update" }
                     ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        { "type": "SelectVariable", "name": "ChargeModeID", "caption": "Charge mode" },
+                        { "type": "SelectVariable", "name": "ChargeTargetID", "caption": "Target charging" }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        { "type": "SelectVariable", "name": "PhaseModeID", "caption": "Phase mode" },
+                        { "type": "SelectVariable", "name": "PhasesActiveID", "caption": "Active phases" }
+                    ]
                 }
             ]
+        },
+        {
+            "type": "Label",
+            "caption": "Week graph: driven km per day are read from the archive of the mileage variable (must be logged)."
         },
         {
             "type": "Label",

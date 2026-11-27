@@ -16,7 +16,9 @@ class AutoKachel extends IPSModuleStrict
 {
     use TileHelper;
 
-    private const VARIABLE_PROPERTIES = ['LevelID', 'RangeID', 'MileageID', 'LockID', 'ParkID', 'DoorsID', 'WindowsID', 'TrunkID', 'AddressID', 'UpdatedID'];
+    private const VARIABLE_PROPERTIES = ['LevelID', 'RangeID', 'MileageID', 'LockID', 'ParkID', 'DoorsID', 'WindowsID', 'TrunkID', 'AddressID', 'UpdatedID', 'ChargeModeID', 'ChargeTargetID', 'PhaseModeID', 'PhasesActiveID'];
+    private const ARCHIVE_GUID = '{43192F0B-135B-4CE7-A0A7-1475603F3060}';
+    private const WEEK_CACHE_SECONDS = 3600;
 
     public function Create(): void
     {
@@ -70,6 +72,10 @@ class AutoKachel extends IPSModuleStrict
     public function MessageSink(int $TimeStamp, int $SenderID, int $Message, array $Data): void
     {
         if ($Message === VM_UPDATE) {
+            // Ein neuer Kilometerstand macht den Wochen-Graphen ungültig.
+            if ($SenderID === $this->ReadPropertyInteger('MileageID')) {
+                $this->SetBuffer('WeekCache', '');
+            }
             $this->TilePush();
         }
     }
@@ -101,8 +107,54 @@ class AutoKachel extends IPSModuleStrict
             'trunk'    => $this->TileFormatted($this->ReadPropertyInteger('TrunkID')),
             'address'  => $this->TileFormatted($this->ReadPropertyInteger('AddressID')),
             'updated'  => $this->TileFormatted($this->ReadPropertyInteger('UpdatedID')),
+            'chargeMode'   => $this->TileFormatted($this->ReadPropertyInteger('ChargeModeID')),
+            'chargeTarget' => $this->TileFormatted($this->ReadPropertyInteger('ChargeTargetID')),
+            'phaseMode'    => $this->TileFormatted($this->ReadPropertyInteger('PhaseModeID')),
+            'phasesActive' => $this->TileFormatted($this->ReadPropertyInteger('PhasesActiveID')),
+            'week'     => $this->WeekGraph(),
             'open'     => $this->OpenIDs()
         ];
+    }
+
+    /**
+     * Gefahrene Kilometer pro Tag der letzten 7 Tage aus dem Archiv des
+     * Kilometerstands (Max-Min je Tag; bei Zähler-Aggregation direkt die Menge).
+     */
+    private function WeekGraph(): ?array
+    {
+        $variableID = $this->ReadPropertyInteger('MileageID');
+        if ($variableID <= 0 || !IPS_VariableExists($variableID)) {
+            return null;
+        }
+        $cache = json_decode($this->GetBuffer('WeekCache'), true);
+        if (is_array($cache) && ($cache['time'] ?? 0) > time() - self::WEEK_CACHE_SECONDS && ($cache['day'] ?? '') === date('Y-m-d')) {
+            return $cache['data'];
+        }
+
+        $archiveIDs = IPS_GetInstanceListByModuleID(self::ARCHIVE_GUID);
+        if (count($archiveIDs) === 0) {
+            return null;
+        }
+        $archiveID = $archiveIDs[0];
+        $start = strtotime('-6 days 00:00');
+        $isCounter = @AC_GetAggregationType($archiveID, $variableID) === 1;
+        $records = @AC_GetAggregatedValues($archiveID, $variableID, 1, $start, time(), 0);
+        if (!is_array($records)) {
+            return null;
+        }
+        $perDay = [];
+        foreach ($records as $record) {
+            $day = date('Y-m-d', (int) $record['TimeStamp']);
+            $perDay[$day] = round($isCounter ? max(0.0, (float) $record['Avg']) : max(0.0, (float) $record['Max'] - (float) $record['Min']), 1);
+        }
+        $days = [];
+        for ($i = 6; $i >= 0; $i--) {
+            $timestamp = strtotime("-{$i} days 00:00");
+            $days[] = ['t' => $timestamp, 'v' => $perDay[date('Y-m-d', $timestamp)] ?? 0.0];
+        }
+        $data = ['days' => $days];
+        $this->SetBuffer('WeekCache', (string) json_encode(['time' => time(), 'day' => date('Y-m-d'), 'data' => $data]));
+        return $data;
     }
 
     /** Variablen-IDs für das Öffnen per Klick (nur konfigurierte). */

@@ -17,8 +17,10 @@ class HundKachel extends IPSModuleStrict
 {
     use TileHelper;
 
-    private const VARIABLE_PROPERTIES = ['StatusID', 'BatteryID', 'AwayID', 'SpeedID', 'AccuracyID', 'SensorID', 'AltitudeID', 'LastPosID', 'DaySleepID', 'NightSleepID', 'RestID', 'SoundID', 'LightID', 'LiveID'];
+    private const VARIABLE_PROPERTIES = ['StatusID', 'BatteryID', 'AwayID', 'SpeedID', 'AccuracyID', 'SensorID', 'AltitudeID', 'LastPosID', 'DaySleepID', 'NightSleepID', 'RestID', 'SoundID', 'LightID', 'LiveID', 'WalksID'];
     private const SWITCH_PROPERTIES = ['SoundID', 'LightID', 'LiveID'];
+    private const ARCHIVE_GUID = '{43192F0B-135B-4CE7-A0A7-1475603F3060}';
+    private const WALK_CACHE_SECONDS = 600;
 
     public function Create(): void
     {
@@ -71,6 +73,10 @@ class HundKachel extends IPSModuleStrict
     public function MessageSink(int $TimeStamp, int $SenderID, int $Message, array $Data): void
     {
         if ($Message === VM_UPDATE) {
+            // Eine neue Gassi-Runde macht den Cache ungültig.
+            if ($SenderID === $this->ReadPropertyInteger('WalksID')) {
+                $this->SetBuffer('WalkCache', '');
+            }
             $this->TilePush();
         }
     }
@@ -126,8 +132,63 @@ class HundKachel extends IPSModuleStrict
             'nightSleep'=> $this->TileFormatted($this->ReadPropertyInteger('NightSleepID')),
             'rest'      => $this->TileFormatted($this->ReadPropertyInteger('RestID')),
             'switches'  => $this->Switches(),
+            'walks'     => $this->Walks(),
             'open'      => $this->OpenIDs()
         ];
+    }
+
+    /**
+     * Gassi-Runden der letzten 7 Tage aus dem Archiv der (geloggten) String-Variable,
+     * z. B. "27.11.2026 07:21-08:08 | 5,02 km | 48 min": die letzten Runden als Liste
+     * plus die Gesamt-Kilometer pro Tag für den Wochen-Graphen.
+     */
+    private function Walks(): ?array
+    {
+        $variableID = $this->ReadPropertyInteger('WalksID');
+        if ($variableID <= 0 || !IPS_VariableExists($variableID)) {
+            return null;
+        }
+        $cache = json_decode($this->GetBuffer('WalkCache'), true);
+        if (is_array($cache) && ($cache['time'] ?? 0) > time() - self::WALK_CACHE_SECONDS && ($cache['day'] ?? '') === date('Y-m-d')) {
+            return $cache['data'];
+        }
+
+        $archiveIDs = IPS_GetInstanceListByModuleID(self::ARCHIVE_GUID);
+        if (count($archiveIDs) === 0) {
+            return null;
+        }
+        $records = @AC_GetLoggedValues($archiveIDs[0], $variableID, strtotime('-6 days 00:00'), time(), 0);
+        if (!is_array($records)) {
+            return null;
+        }
+        $walks = [];
+        $perDay = [];
+        // Neueste zuerst; unparsebare Einträge werden unverändert angezeigt.
+        foreach ($records as $record) {
+            $value = trim((string) $record['Value']);
+            if ($value === '') {
+                continue;
+            }
+            $day = date('Y-m-d', (int) $record['TimeStamp']);
+            $walk = ['when' => date('d.m. H:i', (int) $record['TimeStamp']), 'text' => $value];
+            if (preg_match('/^(\d{2})\.(\d{2})\.(\d{4})\s+(\d{2}:\d{2})-(\d{2}:\d{2})\s*\|\s*([\d.,]+)\s*km\s*\|\s*(\d+)\s*min/u', $value, $m)) {
+                $km = (float) str_replace(',', '.', $m[6]);
+                $day = "{$m[3]}-{$m[2]}-{$m[1]}";
+                $walk = ['when' => "{$m[1]}.{$m[2]}. {$m[4]}", 'text' => sprintf('%s km · %d min', number_format($km, 2, ',', ''), (int) $m[7]), 'km' => $km];
+                $perDay[$day] = round(($perDay[$day] ?? 0.0) + $km, 2);
+            }
+            if (count($walks) < 3) {
+                $walks[] = $walk;
+            }
+        }
+        $days = [];
+        for ($i = 6; $i >= 0; $i--) {
+            $timestamp = strtotime("-{$i} days 00:00");
+            $days[] = ['t' => $timestamp, 'v' => $perDay[date('Y-m-d', $timestamp)] ?? 0.0];
+        }
+        $data = ['list' => $walks, 'days' => $days];
+        $this->SetBuffer('WalkCache', (string) json_encode(['time' => time(), 'day' => date('Y-m-d'), 'data' => $data]));
+        return $data;
     }
 
     /** Schalter-Zustände: nur Bool-Variablen mit Aktion sind bedienbar. */
