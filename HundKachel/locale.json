@@ -5,6 +5,7 @@
             "Assign the variables of the tracker (e.g. Tractive). Every variable is optional - missing values are simply not shown.": "Variablen des Trackers (z.B. Tractive) zuordnen. Jede Variable ist optional - fehlende Werte werden einfach nicht angezeigt.",
             "Name (empty = instance name)": "Name (leer = Instanzname)",
             "Icon": "Icon",
+            "Photo (optional)": "Foto (optional)",
             "Variables": "Variablen",
             "Tracker state": "Tracker-Status",
             "Battery (%)": "Akku (%)",

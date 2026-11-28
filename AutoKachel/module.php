@@ -29,6 +29,7 @@ class AutoKachel extends IPSModuleStrict
         $this->RegisterPropertyString('Name', '');
         $this->RegisterPropertyString('Icon', 'car-side');
         $this->RegisterPropertyString('LockedText', 'Verriegelt');
+        $this->RegisterPropertyInteger('ImageID', 0);
         foreach (self::VARIABLE_PROPERTIES as $property) {
             $this->RegisterPropertyInteger($property, 0);
         }
@@ -155,7 +156,7 @@ class AutoKachel extends IPSModuleStrict
         $lockedText = trim($this->ReadPropertyString('LockedText'));
 
         $name = $this->ReadPropertyString('Name');
-        return [
+        $state = [
             'name'     => $name !== '' ? $name : IPS_GetName($this->InstanceID),
             'icon'     => $this->ReadPropertyString('Icon') !== '' ? $this->ReadPropertyString('Icon') : 'car-side',
             'level'    => is_numeric($levelRaw) ? (float) $levelRaw : null,
@@ -182,6 +183,12 @@ class AutoKachel extends IPSModuleStrict
             'week'     => $this->WeekGraph(),
             'open'     => $this->OpenIDs()
         ];
+        // Das Bild geht nur mit dem initialen Zustand raus; Pushes lassen es weg
+        // und die Kachel behält das vorhandene Bild.
+        if ($this->tileInitial) {
+            $state['image'] = $this->TileImage($this->ReadPropertyInteger('ImageID'));
+        }
+        return $state;
     }
 
     /** Zustand eines schaltbaren Bools für die Kachel, null wenn nicht nutzbar. */

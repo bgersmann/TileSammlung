@@ -29,6 +29,7 @@ class HundKachel extends IPSModuleStrict
 
         $this->RegisterPropertyString('Name', '');
         $this->RegisterPropertyString('Icon', 'dog');
+        $this->RegisterPropertyInteger('ImageID', 0);
         foreach (self::VARIABLE_PROPERTIES as $property) {
             $this->RegisterPropertyInteger($property, 0);
         }
@@ -115,7 +116,7 @@ class HundKachel extends IPSModuleStrict
         $awayRaw = $this->TileRaw($this->ReadPropertyInteger('AwayID'));
 
         $name = $this->ReadPropertyString('Name');
-        return [
+        $state = [
             'name'      => $name !== '' ? $name : IPS_GetName($this->InstanceID),
             'icon'      => $this->ReadPropertyString('Icon') !== '' ? $this->ReadPropertyString('Icon') : 'dog',
             'status'    => $this->TileFormatted($this->ReadPropertyInteger('StatusID')),
@@ -135,6 +136,12 @@ class HundKachel extends IPSModuleStrict
             'walks'     => $this->Walks(),
             'open'      => $this->OpenIDs()
         ];
+        // Das Bild geht nur mit dem initialen Zustand raus; Pushes lassen es weg
+        // und die Kachel behält das vorhandene Bild.
+        if ($this->tileInitial) {
+            $state['image'] = $this->TileImage($this->ReadPropertyInteger('ImageID'));
+        }
+        return $state;
     }
 
     /**

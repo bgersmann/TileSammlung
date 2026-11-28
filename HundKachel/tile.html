@@ -31,6 +31,12 @@
     .dot.ok { background: var(--ok); }
     .dot.warn { background: var(--warn); animation: pulse 2.2s ease-in-out infinite; }
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
+    /* Rundes Foto statt Icon; bleibt auch mit Titelleiste sichtbar. */
+    .av { position: relative; width: 2.2em; height: 2.2em; flex: none; }
+    .av img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block; }
+    .av .dot { position: absolute; right: -2px; bottom: -2px; box-shadow: 0 0 0 2px var(--card-color); }
+    .titled .head .av { display: block; }
+
     .ht { min-width: 0; line-height: 1.25; flex: 1; }
     .ht div { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .sub { font-size: .78em; color: var(--muted); }
@@ -185,8 +191,11 @@
                 <div class="track"><i class="${cls}" style="width:${battery}%"></i></div></div>`;
         }
         const switches = (state.switches || []).length ? `<div class="sws" data-p="2">${state.switches.map((s) => `<button class="sw ${s.on ? 'on' : ''} ${s.action ? '' : 'noaction'}" ${s.action ? `data-press="${Number(s.id)}"` : `data-open="${Number(s.id)}"`} title="${E(T(s.label))}">${icon(s.icon)}<span class="wide-only">${E(T(s.label))}</span></button>`).join('')}</div>` : '';
+        const avatar = has(state.image)
+            ? `<div class="av"><img src="${E(state.image)}" alt=""><span class="dot ${dot}"></span></div>`
+            : `<div class="ic">${icon(state.icon)}<span class="dot ${dot}"></span></div>`;
         box.innerHTML = `<div class="head">
-                <div class="ic">${icon(state.icon)}<span class="dot ${dot}"></span></div>
+                ${avatar}
                 <div class="ht"><div class="name">${E(state.name)}</div>${sub ? `<div class="sub" ${openAttr('status')}><span class="dot inline-dot ${dot}"></span>${E(sub)}</div>` : ''}</div>
             </div>
             ${bar}
@@ -230,7 +239,12 @@
     }
 
     window.handleMessage = (data) => {
-        state = typeof data === 'string' ? JSON.parse(data) : data;
+        const next = typeof data === 'string' ? JSON.parse(data) : data;
+        // Pushes lassen das Bild weg: das vorhandene bleibt erhalten.
+        if (next.image === undefined && state && state.image) {
+            next.image = state.image;
+        }
+        state = next;
         render();
     };
 

@@ -21,6 +21,11 @@
                     "type": "ValidationTextBox",
                     "name": "Icon",
                     "caption": "Icon"
+                },
+                {
+                    "type": "SelectMedia",
+                    "name": "ImageID",
+                    "caption": "Photo (optional)"
                 }
             ]
         },

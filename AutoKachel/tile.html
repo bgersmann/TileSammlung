@@ -58,6 +58,10 @@
     .row span:first-child { color: var(--muted); white-space: nowrap; }
     .row span:last-child { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
+    /* The image absorbs overflow pressure: it shrinks before anything is hidden. */
+    .img { flex: 0 1 auto; display: flex; justify-content: center; min-height: 32px; overflow: hidden; }
+    .img img { max-width: 100%; height: 100%; max-height: 96px; object-fit: contain; }
+
     .grp { display: flex; align-items: center; gap: .6em; min-width: 0; margin-top: .2em;
            font-size: .74em; color: var(--muted); flex: none; }
     .grp span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -220,6 +224,7 @@
                 <div class="ic">${icon(state.icon)}<span class="dot ${dot}"></span></div>
                 <div class="ht"><div class="name">${E(state.name)}</div>${sub ? `<div class="sub" ${openAttr('lock')}><span class="dot inline-dot ${dot}"></span>${E(sub)}</div>` : ''}</div>
             </div>
+            ${has(state.image) ? `<div class="img" data-p="13"><img src="${E(state.image)}" alt=""></div>` : ''}
             ${bar}
             ${kpis([
                 [state.range, T('Range'), 0, 'range'],
@@ -261,7 +266,12 @@
     }
 
     window.handleMessage = (data) => {
-        state = typeof data === 'string' ? JSON.parse(data) : data;
+        const next = typeof data === 'string' ? JSON.parse(data) : data;
+        // Pushes lassen das Bild weg: das vorhandene bleibt erhalten.
+        if (next.image === undefined && state && state.image) {
+            next.image = state.image;
+        }
+        state = next;
         render();
     };
 

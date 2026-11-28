@@ -69,6 +69,9 @@ als Zeilen, unten Parkadresse und letzte Aktualisierung. Alle Variablen optional
 passt damit auch für Autos mit wenigen Datenpunkten. Klick auf einen Wert öffnet die
 Variable.
 
+Optional zeigt die Kachel ein **Fahrzeugbild** (Medienobjekt) als Banner unter der
+Kopfzeile; es wird nur beim Laden der Kachel übertragen, Live-Pushes bleiben schlank.
+
 Zusätzlich optional: **Ladesteuerung** (Lademodus, Zielladen-Status, Phasenmodus ·
 aktive Phasen als Zeilen, z. B. von einer Wattpilot-Wallbox) und ein **Wochen-Graph**
 mit den gefahrenen km pro Tag der letzten 7 Tage aus dem Archiv der
@@ -82,6 +85,9 @@ Signallicht / Live-Tracking als Schalter (nur Bool-Variablen mit Aktion; aktiv =
 Akzentfarbe), Geschwindigkeit und Positionsgenauigkeit als Kennzahlen, Zeilen für
 letzte Positionsmeldung, Schlafzeiten, Sensor und Höhe. Klick auf einen Wert öffnet
 die Variable.
+
+Optional ersetzt ein **Foto** (Medienobjekt) das Icon als runder Avatar mit
+Status-Punkt; es wird nur beim Laden der Kachel übertragen.
 
 **Gassi-Runden (optional):** eine geloggte String-Variable im Format
 `27.11.2026 07:21-08:08 | 5,02 km | 48 min` liefert die letzten drei Runden als Zeilen

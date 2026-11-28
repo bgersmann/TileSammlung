@@ -5,6 +5,7 @@
             "Assign the variables of the car. Every variable is optional - missing values are simply not shown.": "Variablen des Fahrzeugs zuordnen. Jede Variable ist optional - fehlende Werte werden einfach nicht angezeigt.",
             "Name (empty = instance name)": "Name (leer = Instanzname)",
             "Icon": "Icon",
+            "Vehicle image (optional)": "Fahrzeugbild (optional)",
             "Variables": "Variablen",
             "Fuel / battery level (%)": "Tank-/Akkustand (%)",
             "Range": "Reichweite",
