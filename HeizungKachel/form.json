@@ -1,0 +1,94 @@
+{
+    "elements": [
+        {
+            "type": "Label",
+            "bold": true,
+            "caption": "Heating Tile"
+        },
+        {
+            "type": "Label",
+            "caption": "Assign the variables of the heating. Every variable is optional - missing values are simply not shown."
+        },
+        {
+            "type": "RowLayout",
+            "items": [
+                {
+                    "type": "ValidationTextBox",
+                    "name": "Name",
+                    "caption": "Name (empty = instance name)"
+                },
+                {
+                    "type": "ValidationTextBox",
+                    "name": "Icon",
+                    "caption": "Icon"
+                }
+            ]
+        },
+        {
+            "type": "ExpansionPanel",
+            "caption": "Variables",
+            "expanded": true,
+            "items": [
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        { "type": "SelectVariable", "name": "BoilerID", "caption": "Boiler temperature" },
+                        { "type": "SelectVariable", "name": "BoilerSetID", "caption": "Boiler target" }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        { "type": "SelectVariable", "name": "FlowID", "caption": "Flow temperature" },
+                        { "type": "SelectVariable", "name": "ReturnID", "caption": "Return temperature" }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        { "type": "SelectVariable", "name": "OutsideID", "caption": "Outside temperature" },
+                        { "type": "SelectVariable", "name": "ModeID", "caption": "Operating mode" }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        { "type": "SelectVariable", "name": "BurnerID", "caption": "Burner state" },
+                        { "type": "ValidationTextBox", "name": "BurnerActiveText", "caption": "Text that counts as burning" },
+                        { "type": "SelectVariable", "name": "BurnerStartsID", "caption": "Burner starts" }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        { "type": "SelectVariable", "name": "PumpID", "caption": "Heating pump" },
+                        { "type": "SelectVariable", "name": "RoomSetID", "caption": "Room target temperature" }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        { "type": "SelectVariable", "name": "WaterID", "caption": "Hot water temperature" },
+                        { "type": "SelectVariable", "name": "WaterSetID", "caption": "Hot water target" }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        { "type": "SelectVariable", "name": "SlopeID", "caption": "Heating curve slope" },
+                        { "type": "SelectVariable", "name": "LevelID", "caption": "Heating curve level" }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "Label",
+            "caption": "Heating curve: slope and level are adjusted with +/- in the tile (limits and step from presentation or profile, variables need an action). With enough space the tile draws the curve with the current operating point."
+        }
+    ],
+    "actions": [],
+    "status": [
+        { "code": 102, "icon": "active", "caption": "Instance is active" },
+        { "code": 104, "icon": "inactive", "caption": "No variables configured yet" }
+    ]
+}

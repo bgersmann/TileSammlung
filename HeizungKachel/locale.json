@@ -1,0 +1,42 @@
+{
+    "translations": {
+        "de": {
+            "Heating Tile": "Heizungs-Kachel",
+            "Assign the variables of the heating. Every variable is optional - missing values are simply not shown.": "Variablen der Heizung zuordnen. Jede Variable ist optional - fehlende Werte werden einfach nicht angezeigt.",
+            "Name (empty = instance name)": "Name (leer = Instanzname)",
+            "Icon": "Icon",
+            "Variables": "Variablen",
+            "Boiler temperature": "Kesseltemperatur",
+            "Boiler target": "Kessel-Soll",
+            "Flow temperature": "Vorlauftemperatur",
+            "Return temperature": "Rücklauftemperatur",
+            "Outside temperature": "Außentemperatur",
+            "Operating mode": "Betriebsart",
+            "Burner state": "Brennerstatus",
+            "Text that counts as burning": "Text, der als Brenner an gilt",
+            "Burner starts": "Brennerstarts",
+            "Heating pump": "Heizungspumpe",
+            "Room target temperature": "Raumtemperatur Soll",
+            "Hot water temperature": "Warmwassertemperatur",
+            "Hot water target": "Warmwasser-Soll",
+            "Heating curve slope": "Heizkurve Neigung",
+            "Heating curve level": "Heizkurve Niveau",
+            "Heating curve: slope and level are adjusted with +/- in the tile (limits and step from presentation or profile, variables need an action). With enough space the tile draws the curve with the current operating point.": "Heizkurve: Neigung und Niveau werden in der Kachel über +/- verstellt (Grenzen und Schrittweite aus Darstellung bzw. Profil, Variablen benötigen eine Aktion). Bei ausreichend Platz zeichnet die Kachel die Heizkurve mit dem aktuellen Betriebspunkt.",
+            "Instance is active": "Instanz ist aktiv",
+            "No variables configured yet": "Noch keine Variablen konfiguriert",
+            "Instance inactive": "Instanz inaktiv",
+            "Boiler": "Kessel",
+            "Flow": "Vorlauf",
+            "Return": "Rücklauf",
+            "Hot water": "Warmwasser",
+            "Target": "Soll",
+            "Pump": "Pumpe",
+            "Starts": "Brennerstarts",
+            "Room target": "Raum-Soll",
+            "Heating curve": "Heizkurve",
+            "Slope": "Neigung",
+            "Level": "Niveau",
+            "Outside": "Außen"
+        }
+    }
+}

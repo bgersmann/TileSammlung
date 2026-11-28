@@ -1,0 +1,284 @@
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="/icons.js"></script>
+<style>
+    :root {
+        /* --accent-color, --content-color and --card-color are provided by the html-sdk. */
+        --on-accent: #101114;
+        --ok: #19d400;
+        --warn: #f5b800;
+        --err: #f55143;
+        --muted: rgba(128, 128, 128, .95);
+        --muted: color-mix(in srgb, var(--content-color) 62%, transparent);
+        --track: rgba(128, 128, 128, .22);
+        --track: color-mix(in srgb, var(--content-color) 14%, transparent);
+        --line: rgba(128, 128, 128, .18);
+        --line: color-mix(in srgb, var(--content-color) 10%, transparent);
+        --idle: rgba(128, 128, 128, .55);
+        --idle: color-mix(in srgb, var(--content-color) 35%, transparent);
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; overflow: hidden; }
+    /* The margins of the html-sdk become padding, so that the height of the tile is known. */
+    body { margin: 0 !important; }
+    #t { height: 100%; display: flex; flex-direction: column; gap: .6em; overflow: hidden; }
+    .hid { display: none !important; }
+    .narrow .wide-only { display: none !important; }
+
+    .head { display: flex; align-items: center; gap: .7em; min-width: 0; flex: none; }
+    .ic { position: relative; font-size: 1.3em; width: 1.3em; text-align: center; flex: none; line-height: 1; }
+    .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; flex: none; background: var(--idle); }
+    .ic .dot { position: absolute; right: -4px; bottom: -3px; box-shadow: 0 0 0 2px var(--card-color); }
+    .dot.ok { background: var(--ok); animation: pulse 2.2s ease-in-out infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
+    .ht { min-width: 0; line-height: 1.25; flex: 1; }
+    .ht div { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sub { font-size: .78em; color: var(--muted); }
+    .head .pw { font-size: .9em; color: var(--muted); white-space: nowrap; flex: none; }
+    /* Symcon draws icon and name itself when the tile has a title bar. */
+    .head .inline-dot { display: none; }
+    .titled .head { gap: .45em; }
+    .titled .head .ic, .titled .head .name { display: none; }
+    .titled .head .inline-dot { display: inline-block; margin-right: 2px; }
+
+    .kpis { display: flex; gap: .55em; flex: none; }
+    .kpi { flex: 1 1 0; min-width: 0; line-height: 1.15; }
+    .kpi .v { font-size: 1.35em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .kpi .l { font-size: .74em; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    .rows { display: flex; flex-direction: column; flex: none; }
+    .row { display: flex; justify-content: space-between; align-items: center; gap: .85em; padding: .26em 0; border-top: 1px solid var(--line); font-size: .85em; line-height: 1.3; min-height: 1.9em; }
+    .row.first { border-top: 0; }
+    .row > span:first-child { color: var(--muted); white-space: nowrap; }
+    .row > span:last-child { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    .grp { display: flex; align-items: center; gap: .6em; min-width: 0; margin-top: .2em;
+           font-size: .74em; color: var(--muted); flex: none; }
+    .grp span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .grp::before { content: ""; width: 3px; height: 1em; border-radius: 2px; background: var(--accent-color); flex: none; }
+    .grp::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+
+    .stpr { display: inline-flex; align-items: center; gap: 6px; }
+    .stp { width: 24px; height: 24px; border-radius: 50%; border: 0; background: var(--track); color: inherit;
+           font: inherit; font-size: 1em; line-height: 1; cursor: pointer; flex: none; padding: 0; transition: transform .1s; }
+    .stp:active { transform: scale(.9); }
+    .stp:disabled { opacity: .4; cursor: default; }
+    .stpv { min-width: 2.6em; text-align: center; white-space: nowrap; }
+
+    .curve { flex: none; min-width: 0; }
+    .curve svg { display: block; width: 100%; height: auto; }
+    .curve .grid { stroke: var(--line); stroke-width: 1; }
+    .curve .lbl { fill: var(--muted); font-size: 7.5px; }
+    .curve .pl { stroke: var(--accent-color); stroke-width: 2; fill: none; stroke-linecap: round; }
+    .curve .pt { fill: var(--accent-color); stroke: var(--card-color); stroke-width: 1.5; }
+
+    [data-open] { cursor: pointer; }
+    .empty { margin: auto; text-align: center; color: var(--muted); font-size: .9em; }
+</style>
+
+<div id="t"></div>
+
+<script>
+    // Initial state of the instance; afterwards the module pushes the complete state as JSON.
+    let state = /*INITIAL_STATE*/null;
+
+    const params = new URLSearchParams(window.location.search);
+    const px = (name, fallback) => {
+        const value = parseFloat(params.get(name));
+        return isNaN(value) ? fallback : value;
+    };
+    const padTop = px('margintop', 15), padSide = px('marginside', 15), padBottom = px('marginbottom', 15);
+    const box = document.getElementById('t');
+    box.style.padding = `${padTop}px ${padSide}px ${padBottom}px`;
+    // The visualization reserves a larger top margin when it draws a title bar itself.
+    if (padTop >= 40) {
+        document.body.classList.add('titled');
+    }
+
+    const T = (text) => (typeof translate === 'function' ? translate(text) : text);
+    // Values come from variable formatting and names from the configuration: never treat them as markup.
+    const E = (text) => String(text ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const has = (value) => value !== undefined && value !== null && value !== '';
+    // Symcon's own icons are registered under the kit prefix only, so the family is chosen per icon.
+    const isKitIcon = (name) => {
+        try {
+            return !!window['___FONT_AWESOME___'].styles.fak[name];
+        } catch (e) {
+            return false;
+        }
+    };
+    const icon = (name) => `<i class="${isKitIcon(name) ? 'fa-kit' : 'fa-light'} fa-${E(name)}"></i>`;
+
+    // Clicking a value opens its variable in the visualization.
+    const openAttr = (key) => {
+        const id = state && state.open ? Number(state.open[key] || 0) : 0;
+        return id > 0 ? `data-open="${id}"` : '';
+    };
+
+    const kpis = (items) => {
+        const visible = items.filter((i) => has(i[0]));
+        return visible.length ? `<div class="kpis">${visible.map(([value, label, p, key]) => `<div class="kpi" ${p ? `data-p="${p}"` : ''} ${key ? openAttr(key) : ''}><div class="v">${E(value)}</div><div class="l">${E(label)}</div></div>`).join('')}</div>` : '';
+    };
+    // Rows without a value are left out; the first visible row has no separator line.
+    const rows = (items) => {
+        const visible = items.filter((r) => has(r[1]));
+        return visible.length ? `<div class="rows">${visible.map(([key, value, p, openKey], i) => `<div class="row ${i === 0 ? 'first' : ''}" ${p ? `data-p="${p}"` : ''} ${openKey ? openAttr(openKey) : ''}><span>${E(key)}</span><span>${E(value)}</span></div>`).join('')}</div>` : '';
+    };
+
+    // Viessmann-Näherung der Heizkurve: VL = RTsoll + Niveau + Neigung * 1.8318 * (RTsoll - AT)^0.8282
+    function flowFor(at, slope, level, roomSet) {
+        if (at >= roomSet) {
+            return roomSet + level;
+        }
+        return roomSet + level + slope * 1.8317984264 * Math.pow(roomSet - at, 0.8281902);
+    }
+
+    // Heizkurve als kleines Diagramm: x = Außentemperatur +20..-20, y = Vorlauf 20..90 °C,
+    // mit dem aktuellen Betriebspunkt (Außentemperatur, Vorlauf-Ist).
+    function curveBlock(s) {
+        if (!s.slope) {
+            return '';
+        }
+        const slope = s.slope.value;
+        const level = s.level ? s.level.value : 0;
+        const roomSet = has(s.roomSetRaw) ? s.roomSetRaw : 20;
+        const xFor = (at) => 26 + (20 - at) / 40 * 226;
+        const yFor = (t) => 98 - (Math.max(20, Math.min(90, t)) - 20) / 70 * 88;
+        let path = '';
+        for (let at = 20; at >= -20; at -= 2) {
+            path += `${path === '' ? 'M' : 'L'}${xFor(at).toFixed(1)},${yFor(flowFor(at, slope, level, roomSet)).toFixed(1)} `;
+        }
+        let grid = '';
+        for (const t of [30, 50, 70, 90]) {
+            grid += `<line class="grid" x1="26" y1="${yFor(t)}" x2="252" y2="${yFor(t)}"></line><text class="lbl" x="22" y="${yFor(t) + 2.5}" text-anchor="end">${t}</text>`;
+        }
+        for (const at of [20, 10, 0, -10, -20]) {
+            grid += `<line class="grid" x1="${xFor(at)}" y1="10" x2="${xFor(at)}" y2="98"></line><text class="lbl" x="${xFor(at)}" y="108" text-anchor="middle">${at}</text>`;
+        }
+        let point = '';
+        if (has(s.outsideRaw) && has(s.flowRaw)) {
+            const atX = Math.max(-20, Math.min(20, s.outsideRaw));
+            point = `<circle class="pt" cx="${xFor(atX).toFixed(1)}" cy="${yFor(s.flowRaw).toFixed(1)}" r="3.5"><title>${E(`${s.outside ?? ''} / ${s.flow ?? s.boiler ?? ''}`)}</title></circle>`;
+        }
+        return `<div class="curve" data-p="3"><svg viewBox="0 0 258 112">${grid}<path class="pl" d="${path.trim()}"></path>${point}</svg></div>`;
+    }
+
+    // Stepper-Zeile für Neigung/Niveau.
+    function stepperRow(label, obj, key, first) {
+        const inner = obj.action
+            ? `<span class="stpr"><button class="stp" data-adjust="-1" data-key="${key}" ${obj.value <= obj.min ? 'disabled' : ''}>−</button><span class="stpv">${E(obj.text)}</span><button class="stp" data-adjust="1" data-key="${key}" ${obj.value >= obj.max ? 'disabled' : ''}>+</button></span>`
+            : `<span ${openAttr(key)}>${E(obj.text)}</span>`;
+        return `<div class="row ${first ? 'first' : ''}"><span>${E(label)}</span>${inner}</div>`;
+    }
+
+    function render() {
+        if (!state) {
+            return;
+        }
+        if (state.inactive) {
+            box.innerHTML = `<div class="empty">${E(T('Instance inactive'))}</div>`;
+            return;
+        }
+        const dot = state.burnerOn === true ? 'ok' : '';
+        const sub = [state.mode, state.burner].filter(has).join(' · ');
+        let curveSection = '';
+        if (state.slope || state.level) {
+            let steppers = '';
+            if (state.slope) {
+                steppers += stepperRow(T('Slope'), state.slope, 'slope', true);
+            }
+            if (state.level) {
+                steppers += stepperRow(T('Level'), state.level, 'level', !state.slope);
+            }
+            curveSection = `<div class="grp"><span>${E(T('Heating curve'))}</span></div><div class="rows">${steppers}</div>${curveBlock(state)}`;
+        }
+        box.innerHTML = `<div class="head">
+                <div class="ic">${icon(state.icon)}<span class="dot ${dot}"></span></div>
+                <div class="ht"><div class="name">${E(state.name)}</div>${sub ? `<div class="sub" ${openAttr('mode')}><span class="dot inline-dot ${dot}"></span>${E(sub)}</div>` : ''}</div>
+                ${has(state.outside) ? `<div class="pw" ${openAttr('outside')}>${icon('temperature-half')} ${E(state.outside)}</div>` : ''}
+            </div>
+            ${kpis([
+                [state.boiler, T('Boiler'), 0, 'boiler'],
+                [state.flow, T('Flow'), 0, 'flow'],
+                [state.water, T('Hot water'), 4, 'water']
+            ])}
+            ${rows([
+                [T('Return'), state.return, 5, 'return'],
+                [T('Boiler') + ' ' + T('Target'), state.boilerSet, 6, 'boilerSet'],
+                [T('Hot water') + ' ' + T('Target'), state.waterSet, 7, 'waterSet'],
+                [T('Pump'), state.pump, 8, 'pump'],
+                [T('Room target'), state.roomSet, 9, 'roomSet'],
+                [T('Starts'), state.starts, 10, 'burnerStarts']
+            ])}
+            ${curveSection}`;
+        fit();
+    }
+
+    // Fits the content into the tile: everything marked with data-p is hidden,
+    // the highest number first, until nothing overflows.
+    function fit() {
+        const width = box.clientWidth - padSide * 2;
+        document.body.classList.toggle('narrow', width < 200);
+        box.querySelectorAll('.hid').forEach((e) => e.classList.remove('hid'));
+        const overflow = () => box.scrollHeight > box.clientHeight + 1;
+        const steps = [...new Set([...box.querySelectorAll('[data-p]')].map((e) => Number(e.dataset.p)))].sort((a, b) => b - a);
+        for (const step of steps) {
+            if (!overflow()) {
+                break;
+            }
+            const items = [...box.querySelectorAll(`[data-p="${step}"]`)].reverse();
+            for (const item of items) {
+                if (!overflow()) {
+                    break;
+                }
+                item.classList.add('hid');
+            }
+        }
+    }
+
+    window.handleMessage = (data) => {
+        state = typeof data === 'string' ? JSON.parse(data) : data;
+        render();
+    };
+
+    // Neigung/Niveau in Schrittweite verstellen: sofortiges Feedback inklusive
+    // neu gezeichneter Kurve, der Push des Moduls bestätigt danach.
+    function adjustNumber(obj, direction) {
+        let next = Math.round((obj.value + direction * obj.step) * 100) / 100;
+        next = Math.max(obj.min, Math.min(obj.max, next));
+        if (next === obj.value) {
+            return;
+        }
+        const decimals = obj.step < 1 ? 1 : 0;
+        let textValue = next.toFixed(decimals);
+        if (/\d,\d/.test(obj.text)) {
+            textValue = textValue.replace('.', ',');
+        }
+        obj.text = /\d/.test(obj.text) ? obj.text.replace(/-?[\d.,]+/, textValue) : textValue;
+        obj.value = next;
+        render();
+        if (typeof requestAction === 'function') {
+            requestAction('SetValue', JSON.stringify({ id: obj.id, value: next }));
+        }
+    }
+
+    box.addEventListener('click', (event) => {
+        const adjust = event.target.closest('[data-adjust]');
+        if (adjust) {
+            const obj = state[adjust.dataset.key];
+            if (obj) {
+                adjustNumber(obj, Number(adjust.dataset.adjust));
+            }
+            return;
+        }
+        const target = event.target.closest('[data-open]');
+        if (target && typeof openObject === 'function') {
+            openObject(Number(target.dataset.open));
+        }
+    });
+
+    window.addEventListener('resize', fit);
+    if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(fit);
+    }
+    render();
+</script>

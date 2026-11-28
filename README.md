@@ -94,6 +94,17 @@ Status-Punkt; es wird nur beim Laden der Kachel übertragen.
 (Datum/Uhrzeit links, km · Minuten rechts) und einen Wochen-Graphen mit der
 Gesamtstrecke pro Tag (aus dem Archiv, 10 min gecacht).
 
+### HeizungKachel
+
+Heizungsübersicht: Kessel/Vorlauf/Warmwasser als Kennzahlen, Außentemperatur in der
+Kopfzeile, Betriebsart und Brennerstatus (pulsierender Punkt bei Brenner an), Zeilen
+für Rücklauf, Sollwerte, Pumpe und Brennerstarts. **Neigung und Niveau** der Heizkurve
+sind in der Kachel über +/- verstellbar (Grenzen/Schrittweite aus Darstellung bzw.
+Profil, Variablen benötigen eine Aktion). Bei ausreichend Platz zeichnet die Kachel
+die **Heizkurve** (Viessmann-Näherung über Raumsoll, Neigung, Niveau) mit dem
+aktuellen Betriebspunkt aus Außentemperatur und Vorlauf-Ist; sie folgt den Steppern
+sofort. Alle Variablen optional, Klick öffnet die jeweilige Variable.
+
 ## Eigene Kacheln ergänzen
 
 Neues Modulverzeichnis neben `HausgeraeteKachel` anlegen, `libs/TileHelper.php` einbinden

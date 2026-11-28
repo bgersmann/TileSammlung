@@ -1,0 +1,17 @@
+{
+    "id": "{7BBAC101-3B2B-4BDD-B213-BF367E0D3D5A}",
+    "name": "HeizungKachel",
+    "type": 3,
+    "vendor": "",
+    "aliases": [
+        "Heizung Kachel",
+        "Heizkurve Kachel"
+    ],
+    "parentRequirements": [],
+    "childRequirements": [],
+    "implemented": [
+        "{6E3E09BC-4C83-0ABF-4C97-7E7B8C70A64E}"
+    ],
+    "prefix": "TSHZ",
+    "url": ""
+}
